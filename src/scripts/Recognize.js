@@ -18,12 +18,10 @@ export default class Recognize
 
     _init()
     {
-        this._$recognize = $(`<div id="web-recognize-Content">
-            <canvas id="myCanvas">
+        this._$recognize = $(`<canvas id="myCanvas" class="web-recognize-Content">
                 <span style="background-color:#ffff88;">The &lt;canvas&gt; element is not supported by this browser.</span>
-            </canvas>
-        </div>`);
-        this._canvas = this._$recognize.children("#myCanvas")[0];
+            </canvas>`);
+        this._canvas = this._$recognize[0];
         $("body:eq(0)").append(this._$recognize[0]);
         window.onresize = this.canvasResize;
         $(window).scroll((event) => {
@@ -37,7 +35,6 @@ export default class Recognize
         $(document).ready(() => {
             $(".item-view").children().each((index, item)=> {
                 this.capture.addWatchElements($(item));
-                console.log(this.capture);
             });
         });
     }
@@ -47,6 +44,9 @@ export default class Recognize
         this._canvas.width = window.innerWidth;
         this._canvas.height = window.innerHeight;
         this._rc = this.getCanvasRect(this._canvas);
+        this._canvas.style.left = this._rc.x + "px";
+        this._canvas.style.top = this._rc.y + "px";
+        console.log(this._canvas, this._rc.y);
     }
 
     onLoadEvent()
@@ -55,7 +55,6 @@ export default class Recognize
         this._strokeID = 0;
         this._r = new PDollarRecognizer();
         this.canvasResize();
-        console.log(this._canvas);
         this._g = this._canvas.getContext('2d');
         this._g.lineWidth = 3;
         this._g.font = "16px Gentilis";

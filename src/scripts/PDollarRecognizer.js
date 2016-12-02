@@ -24,7 +24,7 @@ export default class PDollarRecognizer
             new Point(0,0,1),new Point(100,100,1),
             new Point(0,200,1)
         )});
-        this.PointClouds[3] = new PointCloud({ name: ">", points: new Array(
+        this.PointClouds[3] = new PointCloud({ name: "<", points: new Array(
             new Point(100,0,1),new Point(0,100,1),
             new Point(100,200,1)
         )});
@@ -46,20 +46,4 @@ export default class PDollarRecognizer
         }
         return (u == -1) ? { Name: "No match.", Score: 0.0 } : Object.assign({path: this.PointClouds[u].originPoints},{ Name: this.PointClouds[u].name, Score: Math.max((b - 2.0) / -2.0, 0.0) });
     };
-
-    AddGesture(name, points)
-    {
-        this.PointClouds[this.PointClouds.length] = new PointCloud(name, points);
-        var num = 0;
-        for (var i = 0; i < this.PointClouds.length; i++) {
-            if (this.PointClouds[i].Name == name)
-                num++;
-        }
-        return num;
-    }
-    DeleteUserGestures()
-    {
-        this.PointClouds.length = NumPointClouds; // clear any beyond the original set
-        return NumPointClouds;
-    }
 }

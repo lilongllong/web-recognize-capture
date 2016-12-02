@@ -18,7 +18,7 @@
 .normal-web > .item-view {
     width: 300px;
     height: 500px;
-    border: 1px solid red;
+    border: 1px solid black;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;

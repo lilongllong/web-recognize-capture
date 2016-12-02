@@ -78,8 +78,8 @@ webpackJsonp([0],[
 	        value: function _init() {
 	            var _this = this;
 
-	            this._$recognize = $("<div id=\"web-recognize-Content\">\n            <canvas id=\"myCanvas\">\n                <span style=\"background-color:#ffff88;\">The &lt;canvas&gt; element is not supported by this browser.</span>\n            </canvas>\n        </div>");
-	            this._canvas = this._$recognize.children("#myCanvas")[0];
+	            this._$recognize = $("<canvas id=\"myCanvas\" class=\"web-recognize-Content\">\n                <span style=\"background-color:#ffff88;\">The &lt;canvas&gt; element is not supported by this browser.</span>\n            </canvas>");
+	            this._canvas = this._$recognize[0];
 	            $("body:eq(0)").append(this._$recognize[0]);
 	            window.onresize = this.canvasResize;
 	            $(window).scroll(function (event) {
@@ -101,7 +101,6 @@ webpackJsonp([0],[
 	            $(document).ready(function () {
 	                $(".item-view").children().each(function (index, item) {
 	                    _this.capture.addWatchElements($(item));
-	                    console.log(_this.capture);
 	                });
 	            });
 	        }
@@ -111,6 +110,9 @@ webpackJsonp([0],[
 	            this._canvas.width = window.innerWidth;
 	            this._canvas.height = window.innerHeight;
 	            this._rc = this.getCanvasRect(this._canvas);
+	            this._canvas.style.left = this._rc.x + "px";
+	            this._canvas.style.top = this._rc.y + "px";
+	            console.log(this._canvas, this._rc.y);
 	        }
 	    }, {
 	        key: "onLoadEvent",
@@ -119,7 +121,6 @@ webpackJsonp([0],[
 	            this._strokeID = 0;
 	            this._r = new _PDollarRecognizer2.default();
 	            this.canvasResize();
-	            console.log(this._canvas);
 	            this._g = this._canvas.getContext('2d');
 	            this._g.lineWidth = 3;
 	            this._g.font = "16px Gentilis";
@@ -228,11 +229,12 @@ webpackJsonp([0],[
 	        value: function drawText(str) {
 	            var $_g = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._g;
 
-	            $_g.clearRect(0, 0, this._rc.width, 20);
+	            $_g.clearRect(0, 0, this._rc.width, 40);
 	            $_g.fillStyle = "rgb(255,255,136)";
-	            $_g.fillRect(0, 0, this._rc.width, 20);
+	            $_g.fillRect(0, 0, this._rc.width, 40);
+	            $_g.font = "40px Arial";
 	            $_g.fillStyle = "rgb(0,0,255)";
-	            $_g.fillText(str, 1, 14);
+	            $_g.fillText(str, 1, 35);
 	        }
 
 	        //
@@ -857,22 +859,6 @@ webpackJsonp([0],[
 	                }
 	            }
 	            return u == -1 ? { Name: "No match.", Score: 0.0 } : Object.assign({ path: this.PointClouds[u].originPoints }, { Name: this.PointClouds[u].name, Score: Math.max((b - 2.0) / -2.0, 0.0) });
-	        }
-	    }, {
-	        key: "AddGesture",
-	        value: function AddGesture(name, points) {
-	            this.PointClouds[this.PointClouds.length] = new _PointCloud2.default(name, points);
-	            var num = 0;
-	            for (var i = 0; i < this.PointClouds.length; i++) {
-	                if (this.PointClouds[i].Name == name) num++;
-	            }
-	            return num;
-	        }
-	    }, {
-	        key: "DeleteUserGestures",
-	        value: function DeleteUserGestures() {
-	            this.PointClouds.length = NumPointClouds; // clear any beyond the original set
-	            return NumPointClouds;
 	        }
 	    }]);
 

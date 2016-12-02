@@ -1,14 +1,14 @@
 {
-    "manifest_version": 1,
+    "manifest_version": 2,
     "name": "web-recognize-demo",
     "description": "A Chrome extension demo for web recognize.",
     "version": "1.0",
 
     "icons": {
-        "128": "icons/128.png",
-        "64": "icons/64.png",
-        "32": "icons/32.png",
-        "16": "icons/16.png"
+        "128": "build/icons/128.png",
+        "64": "build/icons/64.png",
+        "32": "build/icons/32.png",
+        "16": "build/icons/16.png"
     },
 
     "content_scripts": [

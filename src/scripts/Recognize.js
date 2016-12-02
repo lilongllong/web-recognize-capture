@@ -166,11 +166,12 @@ export default class Recognize
 
     drawText(str, $_g = this._g)
     {
-        $_g.clearRect(0, 0, this._rc.width, 20);
+        $_g.clearRect(0, 0, this._rc.width, 40);
         $_g.fillStyle = "rgb(255,255,136)";
-        $_g.fillRect(0, 0, this._rc.width, 20);
+        $_g.fillRect(0, 0, this._rc.width, 40);
+        $_g.font = "40px Arial";
         $_g.fillStyle = "rgb(0,0,255)";
-        $_g.fillText(str, 1, 14);
+        $_g.fillText(str, 1, 35);
     }
 
     //

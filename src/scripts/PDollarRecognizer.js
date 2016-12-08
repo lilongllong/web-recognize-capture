@@ -8,7 +8,7 @@ export default class PDollarRecognizer
     {
         const NumPointClouds = 4;
         this.PointClouds = new Array(NumPointClouds);
-        this.subPoints = new Array(3);
+        this.subPoints = new Array(4);
         this.PointClouds[0] = new PointCloud({ name: "↑", points: new Array(
             new Point(100,0,1),new Point(0,100,1),
             new Point(100,0,2),new Point(200,100,2),
@@ -41,29 +41,74 @@ export default class PDollarRecognizer
         this.subPoints[2] = new PointCloud({ name: "|", points: new Array(
             new Point(0,0,1), new Point(0,100,1)
         )});
+        this.subPoints[3] = new PointCloud({ name: "circle", points: new Array(
+            new Point(0,100,1),new Point(100 - pai, 100 + pai,1),
+            new Point(100,200,1),new Point(100 + pai, 100 + pai, 1),
+            new Point(200,100,1),new Point(100 + pai, 100 - pai,1),
+            new Point(100,0,1),new Point(100 - pai, 100 - pai, 1)
+        )});
     }
 
     Recognize(points)
     {
-        const clouds = this.splitCloudBySpaceRange(points);
+        const filteredPoints = this.filterSignleEdge(points);
+        const clouds = this.splitCloudBySpaceRange(filteredPoints);
         const results = new Array();
         clouds.forEach(cloud => {
-            let pointCloud = new PointCloud({ name: "未知", points: cloud }).points;
-            let b = +Infinity;
-            let u = -1;
-            for (let i = 0; i < this.PointClouds.length; i++) // for each point-cloud template
-            {
-                let d = Util.getInstance().GreedyCloudMatch(pointCloud, this.PointClouds[i]);
-                if (d < b) {
-                    b = d; // best (least) distance
-                    u = i; // point-cloud
-                }
-            }
-            const result = (u == -1) ? { Name: "No match.", Score: 0 } : Object.assign({path: this.PointClouds[u].originPoints},{ Name: this.PointClouds[u].name, Score: Math.max((2.5 - b) / 2.5, 0.0) });
+            const result = this.recognizeSingle(cloud);
             results.push(result);
         });
         return results;
     };
+
+    recognizeSingle(points)
+    {
+        let pointCloud = new PointCloud({ name: "未知", points: points }).points;
+        let b = +Infinity;
+        let u = -1;
+        for (let i = 0; i < this.PointClouds.length; i++) // for each point-cloud template
+        {
+            let d = Util.getInstance().GreedyCloudMatch(pointCloud, this.PointClouds[i]);
+            if (d < b) {
+                b = d; // best (least) distance
+                u = i; // point-cloud
+            }
+        }
+        const result = (u == -1) ? { Name: "No match.", Score: 0 } : Object.assign({path: this.PointClouds[u].originPoints},{ Name: this.PointClouds[u].name, Score: Math.max((2.5 - b) / 2.5, 0.0) });
+        return result;
+    }
+
+    recognizeSingleEdge(points)
+    {
+        let pointCloud = new PointCloud({ name: "未知", points: points }).points;
+        let b = +Infinity;
+        let u = -1;
+        for (let i = 0; i < this.subPoints.length; i++) // for each point-cloud template
+        {
+            let d = Util.getInstance().GreedyCloudMatch(pointCloud, this.subPoints[i]);
+            if (d < b) {
+                b = d; // best (least) distance
+                u = i; // point-cloud
+            }
+        }
+        const result = (u == -1) ? { Name: "No match.", Score: 0 } : Object.assign({path: this.subPoints[u].originPoints},{ Name: this.subPoints[u].name, Score: Math.max((2.5 - b) / 2.5, 0.0) });
+        return result;
+    }
+
+    filterSignleEdge(points)
+    {
+        const edges = this.splitByEdge(points);
+        const results = edges.filter(item => {
+            const result = this.recognizeSingleEdge(item);
+            console.log(result);
+            if (result.Score > 0.001)
+            {
+                return true;
+            }
+            return false;
+        });
+        return this.mergeEdgesToCLouds(results);
+    }
 
     mergeEdgesToCLouds(cloudsByEdge)
     {

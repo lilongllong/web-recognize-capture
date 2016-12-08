@@ -29,7 +29,7 @@ export default class Util
         const radius2 = this.getRadius(points2);
         const minDis = this.cloudMinDistance(points1, points2);
         const minRadius = Math.min(radius1, radius2);
-        console.log(minDis, minRadius);
+        
         if ((minRadius * rule) >  minDis)
         {
             return true;

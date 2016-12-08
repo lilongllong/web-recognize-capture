@@ -13,7 +13,6 @@ export default class Util
     GreedyCloudMatch(points, P)
     {
         var e = 0.50;
-        console.log("数组长度", points.length, P.points.length);
         var step = Math.floor(Math.pow(points.length, 1 - e));
         var min = +Infinity;
         for (var i = 0; i < points.length; i += step) {
@@ -22,6 +21,20 @@ export default class Util
             min = Math.min(min, Math.min(d1, d2)); // min3
         }
         return min;
+    }
+
+    isConnected(points1, points2, rule = 1)
+    {
+        const radius1 = this.getRadius(points1);
+        const radius2 = this.getRadius(points2);
+        const minDis = this.cloudMinDistance(points1, points2);
+        const minRadius = Math.min(radius1, radius2);
+        console.log(minDis, minRadius);
+        if ((minRadius * rule) >  minDis)
+        {
+            return true;
+        }
+        return false;
     }
 
     CloudDistance(pts1, pts2, start)
@@ -51,6 +64,19 @@ export default class Util
             i = (i + 1) % pts1.length;
         } while (i != start);
         return sum;
+    }
+
+    cloudMinDistance(points1, points2)
+    {
+        let minDis = +Infinity;
+        points1.forEach(preItem => {
+            points2.forEach(backItem => {
+                if (this.Distance(preItem, backItem) < minDis) {
+                    minDis = this.Distance(preItem, backItem);
+                }
+            });
+        });
+        return minDis;
     }
 
     getRadius(points)

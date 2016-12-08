@@ -46,7 +46,6 @@ export default class Recognize
         this._rc = this.getCanvasRect(this._canvas);
         this._canvas.style.left = this._rc.x + "px";
         this._canvas.style.top = this._rc.y + "px";
-        console.log(this._canvas, this._rc.y);
     }
 
     onLoadEvent()
@@ -133,14 +132,23 @@ export default class Recognize
             {
                 this._isDown = false;
                 this.drawText("Stroke #" + this._strokeID + " recorded.");
+                // let result = this._r.Recognize(this._points);
+                // console.log(result.Score, "正确率");
+                // if (result.Score > 0.001)
+                // {
+                //     this.drawText("Result: " + result.Name + " (" + this.util.round(result.Score,3) + ").");
+                // }
             }
         }
         else if (button == 2) // segmentation with right-click
         {
             if (this._points.length >= 10)
             {
-                let result = this._r.Recognize(this._points);
-                this.drawText("Result: " + result.Name + " (" + this.util.round(result.Score,2) + ").");
+                let results = this._r.Recognize(this._points);
+                results.map(result => {
+                    this.drawText("Result: " + result.Name + " (" + this.util.round(result.Score,2) + ").");
+                    console.log("Result: " + result.Name + " (" + this.util.round(result.Score,2) + ").");
+                });
                 const centroid = new PointCloud({ name: "test", points: this._points }).Centroid();
                 this.capture.getElementByCapture({ x: centroid.X, y: centroid.Y}, this.util.getRadius(this._points));
                 let gesObj = new Object();

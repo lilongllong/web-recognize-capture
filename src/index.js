@@ -111,7 +111,6 @@ function mouseUpEvent(x, y, button)
             var result = _r.Recognize(_points);
             drawText("Result: " + result.Name + " (" + round(result.Score,2) + ").");
             const centroid = Centroid(_points);
-            console.log(centroid);
             capture.getElementByCapture({ x: centroid.X, y: centroid.Y}, getRadius(_points));
             var gesObj = new Object();
             gesObj.action = "gesture";

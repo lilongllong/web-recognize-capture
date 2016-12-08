@@ -32,12 +32,10 @@ export default class Capture {
 
     filterJudgement(element, location, range)
     {
-        console.log($(element));
         const y = $(element).offset().top;
         const x = $(element).offset().left;
         const width = $(element).width();
         const height = $(element).height();
-        console.log(y,x,width,height);
         const end = {
             x: x + width,
             y: y + height,
@@ -51,11 +49,9 @@ export default class Capture {
         const circle = new Circle();
         circle.centerLocation = cLoc;
         circle.radius = cRadius;
-        console.log(rStart, rEnd);
         const rect = new Rectangle();
         rect.startPoint = [ rStart.x, rStart.y ];
         rect.endPoint = [ rEnd.x, rEnd.y ];
-        console.log(cLoc, "center");
         const vJoin = rect.getVectorFrom(cLoc).abs();
         const vNear = rect.getNearestDiagonalVector(cLoc).abs();
         const vResult = vJoin.minus(vNear);

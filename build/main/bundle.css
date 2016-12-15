@@ -1,4 +1,7 @@
-.web-recognize-Content {
+.grid-container.row {
+  position: relative;
+}
+.grid-container.row > .web-recognize-Content {
   position: absolute;
   top: 0;
   left: 0;
@@ -7,12 +10,10 @@
   margin: 0;
   width: 100%;
   height: 100%;
-  z-index: 9999;
+  z-index: 999;
   opacity: 0.5;
   font-size: 18px;
 }
-html,
-body {
-  padding: 0;
-  margin: 0;
+.grid-container.row > .selected.grid-item {
+  border: 2px solid red;
 }

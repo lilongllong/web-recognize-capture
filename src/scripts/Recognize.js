@@ -22,38 +22,41 @@ export default class Recognize
                 <span style="background-color:#ffff88;">The &lt;canvas&gt; element is not supported by this browser.</span>
             </canvas>`);
         this._canvas = this._$recognize[0];
-        $("body:eq(0)").append(this._$recognize[0]);
-        window.onresize = this.canvasResize;
-        $(window).scroll((event) => {
-            this.canvasResize();
-        });
+        const waitListReady = setInterval(() => {
+            if ($(".grid-container.row").length)
+            {
+                this.onLoadEvent();
+                clearInterval(waitListReady);
+            }
+        }, 100);
         $(window).ready(this.onLoadEvent.bind(this));
-        $(this._canvas).on("mouseup", (event) => { this.mouseUpEvent(event.clientX, event.clientY, event.button); });
-        $(this._canvas).on("mousedown", (event) => { this.mouseDownEvent(event.clientX, event.clientY, event.button); });
-        $(this._canvas).on("mousemove", (event) => { this.mouseMoveEvent(event.clientX, event.clientY, event.button); });
+        $(this._canvas).on("mouseup", (event) => { this.mouseUpEvent(event.offsetX, event.offsetY, event.button); });
+        $(this._canvas).on("mousedown", (event) => { this.mouseDownEvent(event.offsetX, event.offsetY, event.button); });
+        $(this._canvas).on("mousemove", (event) => { this.mouseMoveEvent(event.offsetX, event.offsetY, event.button); });
         $(this._canvas).on("contextmenu", () => false);
-        $(document).ready(() => {
-            $(".item-view").children().each((index, item)=> {
-                this.capture.addWatchElements($(item));
-            });
-        });
     }
 
-    canvasResize()
-    {
-        this._canvas.width = window.innerWidth;
-        this._canvas.height = window.innerHeight;
-        this._rc = this.getCanvasRect(this._canvas);
-        this._canvas.style.left = this._rc.x + "px";
-        this._canvas.style.top = this._rc.y + "px";
-    }
+    // canvasResize()
+    // {
+    //     this._canvas.width = window.innerWidth;
+    //     this._canvas.height = window.innerHeight;
+    //     this._rc = this.getCanvasRect(this._canvas);
+    //     this._canvas.style.left = this._rc.x + "px";
+    //     this._canvas.style.top = this._rc.y + "px";
+    // }
 
     onLoadEvent()
     {
+        $(".grid-container.row").append(this._$recognize[0]);
+        this.capture.watchDOMBySelector("default");
         this._points = new Array(); // point array for current stroke
         this._strokeID = 0;
         this._r = new PDollarRecognizer();
-        this.canvasResize();
+        this._canvas.width = $(".grid-container.row").width();
+        this._canvas.height = $(".grid-container.row").height();
+        this._rc = this.getCanvasRect(this._canvas);
+
+        // this.canvasResize();
         this._g = this._canvas.getContext('2d');
         this._g.lineWidth = 3;
         this._g.font = "16px Gentilis";
@@ -91,8 +94,8 @@ export default class Recognize
         if (button <= 1)
         {
             this._isDown = true;
-            x -= this._rc.x;
-            y -= this._rc.y - this.getScrollY();
+            // x -= this._rc.x;
+            // y -= this._rc.y - this.getScrollY();
             if (this._strokeID == 0) // starting a new gesture
             {
                 this._points.length = 0;
@@ -115,8 +118,8 @@ export default class Recognize
     {
         if (this._isDown)
         {
-            x -= this._rc.x;
-            y -= this._rc.y - this.getScrollY();
+            // x -= this._rc.x;
+            // y -= this._rc.y - this.getScrollY();
             this._points[this._points.length] = new Point(x, y, this._strokeID); // append
             this.drawConnectedPoint(this._points.length - 2, this._points.length - 1);
         }
@@ -148,9 +151,13 @@ export default class Recognize
                 results.map(result => {
                     this.drawText("Result: " + result.Name + " (" + this.util.round(result.Score,2) + ").");
                     console.log("Result: " + result.Name + " (" + this.util.round(result.Score,2) + ").");
+                    if (result.Score !== 0)
+                    {
+                        const centroid = new PointCloud({ name: "test", points: result.path }).Centroid();
+                        const selectedDom = this.capture.getElementByCapture({ x: centroid.X, y: centroid.Y}, this.util.getRadius(result.path));
+                        console.log(selectedDom);        
+                    }
                 });
-                const centroid = new PointCloud({ name: "test", points: this._points }).Centroid();
-                this.capture.getElementByCapture({ x: centroid.X, y: centroid.Y}, this.util.getRadius(this._points));
                 let gesObj = new Object();
                 gesObj.action = "gesture";
                 gesObj.points = this._points;

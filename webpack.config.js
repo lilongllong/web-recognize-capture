@@ -1,11 +1,12 @@
-const webpack = require("webpack");
-const path = require("path");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const path = require("path");
+const webpack = require("webpack");
+const glob = require("glob");
 
 module.exports = {
     entry: {
         vendor: [ "jquery" ],
-        main: [ "./src/scripts/index.js", "./src/resource/index.less" ]
+        main: [ "./src/scripts/index.js", "./src/resource/index.less", ...glob.sync("./src/html/*"), ...glob.sync("./src/icons/*")]
     },
     output: {
         path: path.resolve("./build"),
@@ -25,7 +26,11 @@ module.exports = {
             },
             {
                 test: /\.(png|jpg|gif)$/,
-                loader: 'url-loader!file-loader?limit=8192'
+                loader: "url-loader!file-loader?limit=8192&name=/icons/[name].[ext]"
+            },
+            {
+                test: /\.(html|htm|json)$/,
+                loader: "file-loader?name=[name].[ext]"
             }
         ]
     },

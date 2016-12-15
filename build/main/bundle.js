@@ -3,7 +3,15 @@ webpackJsonp([0],[
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(2);
-	module.exports = __webpack_require__(14);
+	__webpack_require__(15);
+	__webpack_require__(19);
+	__webpack_require__(20);
+	__webpack_require__(21);
+	__webpack_require__(22);
+	__webpack_require__(23);
+	__webpack_require__(24);
+	__webpack_require__(25);
+	module.exports = __webpack_require__(26);
 
 
 /***/ },
@@ -41,19 +49,19 @@ webpackJsonp([0],[
 
 	var _Capture2 = _interopRequireDefault(_Capture);
 
-	var _PDollarRecognizer = __webpack_require__(10);
+	var _PDollarRecognizer = __webpack_require__(11);
 
 	var _PDollarRecognizer2 = _interopRequireDefault(_PDollarRecognizer);
 
-	var _Point = __webpack_require__(11);
+	var _Point = __webpack_require__(12);
 
 	var _Point2 = _interopRequireDefault(_Point);
 
-	var _PointCloud = __webpack_require__(12);
+	var _PointCloud = __webpack_require__(13);
 
 	var _PointCloud2 = _interopRequireDefault(_PointCloud);
 
-	var _Util = __webpack_require__(13);
+	var _Util = __webpack_require__(14);
 
 	var _Util2 = _interopRequireDefault(_Util);
 
@@ -80,47 +88,49 @@ webpackJsonp([0],[
 
 	            this._$recognize = $("<canvas id=\"myCanvas\" class=\"web-recognize-Content\">\n                <span style=\"background-color:#ffff88;\">The &lt;canvas&gt; element is not supported by this browser.</span>\n            </canvas>");
 	            this._canvas = this._$recognize[0];
-	            $("body:eq(0)").append(this._$recognize[0]);
-	            window.onresize = this.canvasResize;
-	            $(window).scroll(function (event) {
-	                _this.canvasResize();
-	            });
+	            var waitListReady = setInterval(function () {
+	                if ($(".grid-container.row").length) {
+	                    _this.onLoadEvent();
+	                    clearInterval(waitListReady);
+	                }
+	            }, 100);
 	            $(window).ready(this.onLoadEvent.bind(this));
 	            $(this._canvas).on("mouseup", function (event) {
-	                _this.mouseUpEvent(event.clientX, event.clientY, event.button);
+	                _this.mouseUpEvent(event.offsetX, event.offsetY, event.button);
 	            });
 	            $(this._canvas).on("mousedown", function (event) {
-	                _this.mouseDownEvent(event.clientX, event.clientY, event.button);
+	                _this.mouseDownEvent(event.offsetX, event.offsetY, event.button);
 	            });
 	            $(this._canvas).on("mousemove", function (event) {
-	                _this.mouseMoveEvent(event.clientX, event.clientY, event.button);
+	                _this.mouseMoveEvent(event.offsetX, event.offsetY, event.button);
 	            });
 	            $(this._canvas).on("contextmenu", function () {
 	                return false;
 	            });
-	            $(document).ready(function () {
-	                $(".item-view").children().each(function (index, item) {
-	                    _this.capture.addWatchElements($(item));
-	                });
-	            });
 	        }
-	    }, {
-	        key: "canvasResize",
-	        value: function canvasResize() {
-	            this._canvas.width = window.innerWidth;
-	            this._canvas.height = window.innerHeight;
-	            this._rc = this.getCanvasRect(this._canvas);
-	            this._canvas.style.left = this._rc.x + "px";
-	            this._canvas.style.top = this._rc.y + "px";
-	            console.log(this._canvas, this._rc.y);
-	        }
+
+	        // canvasResize()
+	        // {
+	        //     this._canvas.width = window.innerWidth;
+	        //     this._canvas.height = window.innerHeight;
+	        //     this._rc = this.getCanvasRect(this._canvas);
+	        //     this._canvas.style.left = this._rc.x + "px";
+	        //     this._canvas.style.top = this._rc.y + "px";
+	        // }
+
 	    }, {
 	        key: "onLoadEvent",
 	        value: function onLoadEvent() {
+	            $(".grid-container.row").append(this._$recognize[0]);
+	            this.capture.watchDOMBySelector("default");
 	            this._points = new Array(); // point array for current stroke
 	            this._strokeID = 0;
 	            this._r = new _PDollarRecognizer2.default();
-	            this.canvasResize();
+	            this._canvas.width = $(".grid-container.row").width();
+	            this._canvas.height = $(".grid-container.row").height();
+	            this._rc = this.getCanvasRect(this._canvas);
+
+	            // this.canvasResize();
 	            this._g = this._canvas.getContext('2d');
 	            this._g.lineWidth = 3;
 	            this._g.font = "16px Gentilis";
@@ -158,8 +168,8 @@ webpackJsonp([0],[
 	            }; // disable drag-select
 	            if (button <= 1) {
 	                this._isDown = true;
-	                x -= this._rc.x;
-	                y -= this._rc.y - this.getScrollY();
+	                // x -= this._rc.x;
+	                // y -= this._rc.y - this.getScrollY();
 	                if (this._strokeID == 0) // starting a new gesture
 	                    {
 	                        this._points.length = 0;
@@ -179,8 +189,8 @@ webpackJsonp([0],[
 	        key: "mouseMoveEvent",
 	        value: function mouseMoveEvent(x, y, button) {
 	            if (this._isDown) {
-	                x -= this._rc.x;
-	                y -= this._rc.y - this.getScrollY();
+	                // x -= this._rc.x;
+	                // y -= this._rc.y - this.getScrollY();
 	                this._points[this._points.length] = new _Point2.default(x, y, this._strokeID); // append
 	                this.drawConnectedPoint(this._points.length - 2, this._points.length - 1);
 	            }
@@ -188,6 +198,8 @@ webpackJsonp([0],[
 	    }, {
 	        key: "mouseUpEvent",
 	        value: function mouseUpEvent(x, y, button) {
+	            var _this2 = this;
+
 	            document.onselectstart = function () {
 	                return true;
 	            }; // enable drag-select
@@ -198,14 +210,26 @@ webpackJsonp([0],[
 	                if (this._isDown) {
 	                    this._isDown = false;
 	                    this.drawText("Stroke #" + this._strokeID + " recorded.");
+	                    // let result = this._r.Recognize(this._points);
+	                    // console.log(result.Score, "正确率");
+	                    // if (result.Score > 0.001)
+	                    // {
+	                    //     this.drawText("Result: " + result.Name + " (" + this.util.round(result.Score,3) + ").");
+	                    // }
 	                }
 	            } else if (button == 2) // segmentation with right-click
 	                {
 	                    if (this._points.length >= 10) {
-	                        var result = this._r.Recognize(this._points);
-	                        this.drawText("Result: " + result.Name + " (" + this.util.round(result.Score, 2) + ").");
-	                        var centroid = new _PointCloud2.default({ name: "test", points: this._points }).Centroid();
-	                        this.capture.getElementByCapture({ x: centroid.X, y: centroid.Y }, this.util.getRadius(this._points));
+	                        var results = this._r.Recognize(this._points);
+	                        results.map(function (result) {
+	                            _this2.drawText("Result: " + result.Name + " (" + _this2.util.round(result.Score, 2) + ").");
+	                            console.log("Result: " + result.Name + " (" + _this2.util.round(result.Score, 2) + ").");
+	                            if (result.Score !== 0) {
+	                                var centroid = new _PointCloud2.default({ name: "test", points: result.path }).Centroid();
+	                                var selectedDom = _this2.capture.getElementByCapture({ x: centroid.X, y: centroid.Y }, _this2.util.getRadius(result.path));
+	                                console.log(selectedDom);
+	                            }
+	                        });
 	                        var gesObj = new Object();
 	                        gesObj.action = "gesture";
 	                        gesObj.points = this._points;
@@ -304,6 +328,10 @@ webpackJsonp([0],[
 
 	var _Vector2 = _interopRequireDefault(_Vector);
 
+	var _config = __webpack_require__(10);
+
+	var _config2 = _interopRequireDefault(_config);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -314,24 +342,44 @@ webpackJsonp([0],[
 
 	        this.watchElements = new Array();
 	    }
+	    // algnrith advance
+
 
 	    _createClass(Capture, [{
 	        key: "addWatchElements",
-	        value: function addWatchElements(element) {
-	            this.watchElements.push(element);
+	        value: function addWatchElements(rootElement, element) {
+	            this.watchElements.push({
+	                rootElement: rootElement,
+	                element: element
+	            });
+	        }
+	    }, {
+	        key: "watchDOMBySelector",
+	        value: function watchDOMBySelector() {
+	            var _this = this;
+
+	            var selectors = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+
+	            selectors = ".grid-container > .grid-item";
+	            $(selectors).each(function (index, item) {
+	                _this.addWatchElements(item, $(item).find(".grid-panel > .img-box > .img-a")[0]);
+	                _this.addWatchElements(item, $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0]);
+	            });
 	        }
 	    }, {
 	        key: "getElementByCapture",
 	        value: function getElementByCapture(location, range) {
-	            var _this = this;
+	            var _this2 = this;
 
 	            var result = this.watchElements.filter(function (item) {
-	                var judge = _this.filterJudgement(item, location, range);
+	                var judge = _this2.filterJudgement(item.element, location, range);
+	                console.log("judge", judge);
 	                if (judge) {
-	                    item.addClass("selected");
+
+	                    // $(item.rootElement).addClass("selected");
 	                } else {
-	                    item.removeClass("selected");
-	                }
+	                        // $(item.rootElement).removeClass("selected");
+	                    }
 	                return judge;
 	            });
 	            return result;
@@ -339,30 +387,28 @@ webpackJsonp([0],[
 	    }, {
 	        key: "filterJudgement",
 	        value: function filterJudgement(element, location, range) {
-	            console.log($(element));
-	            var y = $(element).offset().top;
-	            var x = $(element).offset().left;
-	            var width = $(element).width();
-	            var height = $(element).height();
-	            console.log(y, x, width, height);
+	            var rect = this.getPositionOfElement(element);
+	            var start = {
+	                x: rect.left,
+	                y: rect.top
+	            };
 	            var end = {
-	                x: x + width,
-	                y: y + height
+	                x: rect.right,
+	                y: rect.bottom
 	            };
 
-	            return this.isJoined({ x: x, y: y }, end, location, range);
+	            return this.isJoined(start, end, location, range);
 	        }
 	    }, {
 	        key: "isJoined",
 	        value: function isJoined(rStart, rEnd, cLoc, cRadius) {
+	            // console.log(rStart, rEnd, cLoc, cRadius);
 	            var circle = new _Circle2.default();
 	            circle.centerLocation = cLoc;
 	            circle.radius = cRadius;
-	            console.log(rStart, rEnd);
 	            var rect = new _Rectangle2.default();
 	            rect.startPoint = [rStart.x, rStart.y];
 	            rect.endPoint = [rEnd.x, rEnd.y];
-	            console.log(cLoc, "center");
 	            var vJoin = rect.getVectorFrom(cLoc).abs();
 	            var vNear = rect.getNearestDiagonalVector(cLoc).abs();
 	            var vResult = vJoin.minus(vNear);
@@ -384,6 +430,26 @@ webpackJsonp([0],[
 	                return u <= cRadius;
 	            }
 	            return false;
+	        }
+	    }, {
+	        key: "getPositionOfElement",
+	        value: function getPositionOfElement(element) {
+	            var x = 0;
+	            var y = 0;
+	            var width = element.offsetWidth;
+	            var height = element.offsetHeight;
+
+	            while (element && !isNaN(element.offsetLeft) && !isNaN(element.offsetTop)) {
+	                x += element.offsetLeft - element.scrollLeft;
+	                y += element.offsetTop - element.scrollTop;
+	                element = element.offsetParent;
+	            }
+	            return {
+	                left: x,
+	                right: x + width,
+	                top: y,
+	                bottom: y + height
+	            };
 	        }
 	    }]);
 
@@ -806,6 +872,12 @@ webpackJsonp([0],[
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = __webpack_require__.p + "config.json";
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
@@ -814,15 +886,15 @@ webpackJsonp([0],[
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Point = __webpack_require__(11);
+	var _Point = __webpack_require__(12);
 
 	var _Point2 = _interopRequireDefault(_Point);
 
-	var _PointCloud = __webpack_require__(12);
+	var _PointCloud = __webpack_require__(13);
 
 	var _PointCloud2 = _interopRequireDefault(_PointCloud);
 
-	var _Util = __webpack_require__(13);
+	var _Util = __webpack_require__(14);
 
 	var _Util2 = _interopRequireDefault(_Util);
 
@@ -836,29 +908,148 @@ webpackJsonp([0],[
 
 	        var NumPointClouds = 4;
 	        this.PointClouds = new Array(NumPointClouds);
-	        this.PointClouds[0] = new _PointCloud2.default({ name: "X", points: new Array(new _Point2.default(0, 0, 1), new _Point2.default(100, 100, 1), new _Point2.default(200, 200, 1), new _Point2.default(200, 0, 2), new _Point2.default(100, 100, 2), new _Point2.default(0, 200, 2)) });
+	        this.subPoints = new Array(4);
+	        this.PointClouds[0] = new _PointCloud2.default({ name: "↑", points: new Array(new _Point2.default(100, 0, 1), new _Point2.default(0, 100, 1), new _Point2.default(100, 0, 2), new _Point2.default(200, 100, 2), new _Point2.default(100, 0, 3), new _Point2.default(0, 300, 3)) });
+	        this.PointClouds[1] = new _PointCloud2.default({ name: "↓", points: new Array(new _Point2.default(100, 0, 1), new _Point2.default(0, 300, 1), new _Point2.default(0, 200, 2), new _Point2.default(100, 300, 2), new _Point2.default(200, 200, 2)) });
+	        this.PointClouds[2] = new _PointCloud2.default({ name: "×", points: new Array(new _Point2.default(0, 0, 1), new _Point2.default(100, 100, 1), new _Point2.default(200, 200, 1), new _Point2.default(200, 0, 2), new _Point2.default(100, 100, 2), new _Point2.default(0, 200, 2)) });
 	        var pai = 100 * Math.sqrt(2);
-	        this.PointClouds[1] = new _PointCloud2.default({ name: "circle", points: new Array(new _Point2.default(0, 100, 1), new _Point2.default(100 - pai, 100 + pai, 1), new _Point2.default(100, 200, 1), new _Point2.default(100 + pai, 100 + pai, 1), new _Point2.default(200, 100, 1), new _Point2.default(100 + pai, 100 - pai, 1), new _Point2.default(100, 0, 1), new _Point2.default(100 - pai, 100 - pai, 1)) });
-	        this.PointClouds[2] = new _PointCloud2.default({ name: ">", points: new Array(new _Point2.default(0, 0, 1), new _Point2.default(100, 100, 1), new _Point2.default(0, 200, 1)) });
-	        this.PointClouds[3] = new _PointCloud2.default({ name: ">", points: new Array(new _Point2.default(100, 0, 1), new _Point2.default(0, 100, 1), new _Point2.default(100, 200, 1)) });
+	        this.PointClouds[3] = new _PointCloud2.default({ name: "circle", points: new Array(new _Point2.default(0, 100, 1), new _Point2.default(100 - pai, 100 + pai, 1), new _Point2.default(100, 200, 1), new _Point2.default(100 + pai, 100 + pai, 1), new _Point2.default(200, 100, 1), new _Point2.default(100 + pai, 100 - pai, 1), new _Point2.default(100, 0, 1), new _Point2.default(100 - pai, 100 - pai, 1)) });
+
+	        this.subPoints[0] = new _PointCloud2.default({ name: "/", points: new Array(new _Point2.default(100, 0, 1), new _Point2.default(0, 100, 1)) });
+	        this.subPoints[1] = new _PointCloud2.default({ name: "\\", points: new Array(new _Point2.default(0, 0, 1), new _Point2.default(100, 100, 1)) });
+	        this.subPoints[2] = new _PointCloud2.default({ name: "|", points: new Array(new _Point2.default(0, 0, 1), new _Point2.default(0, 100, 1)) });
+	        this.subPoints[3] = new _PointCloud2.default({ name: "circle", points: new Array(new _Point2.default(0, 100, 1), new _Point2.default(100 - pai, 100 + pai, 1), new _Point2.default(100, 200, 1), new _Point2.default(100 + pai, 100 + pai, 1), new _Point2.default(200, 100, 1), new _Point2.default(100 + pai, 100 - pai, 1), new _Point2.default(100, 0, 1), new _Point2.default(100 - pai, 100 - pai, 1)) });
 	    }
 
 	    _createClass(PDollarRecognizer, [{
 	        key: "Recognize",
 	        value: function Recognize(points) {
-	            points = new _PointCloud2.default({ name: "未知", points: points }).points;
+	            var _this = this;
+
+	            var filteredPoints = this.filterSignleEdge(points);
+	            var clouds = this.splitCloudBySpaceRange(filteredPoints);
+	            var results = new Array();
+	            clouds.forEach(function (cloud) {
+	                var result = _this.recognizeSingle(cloud);
+	                results.push(result);
+	            });
+	            return results;
+	        }
+	    }, {
+	        key: "recognizeSingle",
+	        value: function recognizeSingle(points) {
+	            var pointCloud = new _PointCloud2.default({ name: "未知", points: points }).points;
 	            var b = +Infinity;
 	            var u = -1;
 	            for (var i = 0; i < this.PointClouds.length; i++) // for each point-cloud template
 	            {
-	                console.log(this.PointClouds);
-	                var d = _Util2.default.getInstance().GreedyCloudMatch(points, this.PointClouds[i]);
+	                var d = _Util2.default.getInstance().GreedyCloudMatch(pointCloud, this.PointClouds[i]);
 	                if (d < b) {
 	                    b = d; // best (least) distance
 	                    u = i; // point-cloud
 	                }
 	            }
-	            return u == -1 ? { Name: "No match.", Score: 0.0 } : Object.assign({ path: this.PointClouds[u].originPoints }, { Name: this.PointClouds[u].name, Score: Math.max((b - 2.0) / -2.0, 0.0) });
+	            var result = u == -1 ? { Name: "No match.", Score: 0 } : Object.assign({ path: this.PointClouds[u].originPoints }, { Name: this.PointClouds[u].name, Score: Math.max((2.5 - b) / 2.5, 0) });
+	            return result;
+	        }
+	    }, {
+	        key: "recognizeSingleEdge",
+	        value: function recognizeSingleEdge(points) {
+	            var pointCloud = new _PointCloud2.default({ name: "未知", points: points }).points;
+	            var b = +Infinity;
+	            var u = -1;
+	            for (var i = 0; i < this.subPoints.length; i++) // for each point-cloud template
+	            {
+	                var d = _Util2.default.getInstance().GreedyCloudMatch(pointCloud, this.subPoints[i]);
+	                if (d < b) {
+	                    b = d; // best (least) distance
+	                    u = i; // point-cloud
+	                }
+	            }
+	            var result = u == -1 ? { Name: "No match.", Score: 0 } : Object.assign({ path: this.subPoints[u].originPoints }, { Name: this.subPoints[u].name, Score: Math.max((2.5 - b) / 2.5, 0.0) });
+	            return result;
+	        }
+	    }, {
+	        key: "filterSignleEdge",
+	        value: function filterSignleEdge(points) {
+	            var _this2 = this;
+
+	            var edges = this.splitByEdge(points);
+	            var results = edges.filter(function (item) {
+	                var result = _this2.recognizeSingleEdge(item);
+	                if (result.Score > 0.001) {
+	                    return true;
+	                }
+	                return false;
+	            });
+	            return this.mergeEdgesToCLouds(results);
+	        }
+	    }, {
+	        key: "mergeEdgesToCLouds",
+	        value: function mergeEdgesToCLouds(cloudsByEdge) {
+	            var clouds = cloudsByEdge.reduce(function (prev, curr) {
+	                return prev.concat(curr);
+	            }, []);
+	            return clouds;
+	        }
+	    }, {
+	        key: "splitCloudBySpaceRange",
+	        value: function splitCloudBySpaceRange(points) {
+	            var _this3 = this;
+
+	            var edges = this.splitByEdge(points);
+
+	            var clouds = new Array();
+	            var index = 0;
+	            edges.reduce(function (prev, curr) {
+	                if (!prev) {
+	                    clouds[index] = new Array();
+	                    clouds[index].push(curr);
+	                    return curr;
+	                }
+	                var canMerged = false;
+	                clouds[index].forEach(function (item) {
+	                    if (_Util2.default.getInstance().isConnected(item, curr)) {
+	                        canMerged = true;
+	                    }
+	                });
+
+	                if (canMerged) {
+	                    clouds[index].push(curr);
+	                } else {
+	                    index++;
+	                    clouds[index] = new Array();
+	                    clouds[index].push(curr);
+	                }
+	                return curr;
+	            }, null);
+	            var result = clouds.map(function (item) {
+	                return _this3.mergeEdgesToCLouds(item);
+	            });
+	            return result;
+	        }
+	    }, {
+	        key: "splitByEdge",
+	        value: function splitByEdge(points) {
+	            var edges = new Array();
+	            var index = 0;
+	            points.reduce(function (prev, next) {
+	                if (!prev) {
+	                    edges[index] = new Array();
+	                    edges[index].push(next);
+	                    return next;
+	                }
+
+	                if (prev.ID === next.ID) {
+	                    edges[index].push(next);
+	                } else {
+	                    index++;
+	                    edges[index] = new Array();
+	                    edges[index].push(next);
+	                }
+	                return next;
+	            }, null);
+	            return edges;
 	        }
 	    }]);
 
@@ -868,7 +1059,7 @@ webpackJsonp([0],[
 	exports.default = PDollarRecognizer;
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -890,7 +1081,7 @@ webpackJsonp([0],[
 	exports.default = Point;
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -901,11 +1092,11 @@ webpackJsonp([0],[
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Point = __webpack_require__(11);
+	var _Point = __webpack_require__(12);
 
 	var _Point2 = _interopRequireDefault(_Point);
 
-	var _Util = __webpack_require__(13);
+	var _Util = __webpack_require__(14);
 
 	var _Util2 = _interopRequireDefault(_Util);
 
@@ -1023,7 +1214,7 @@ webpackJsonp([0],[
 	exports.default = PointCloud;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1045,7 +1236,6 @@ webpackJsonp([0],[
 	        key: "GreedyCloudMatch",
 	        value: function GreedyCloudMatch(points, P) {
 	            var e = 0.50;
-	            console.log("数组长度", points.length, P.points.length);
 	            var step = Math.floor(Math.pow(points.length, 1 - e));
 	            var min = +Infinity;
 	            for (var i = 0; i < points.length; i += step) {
@@ -1054,6 +1244,21 @@ webpackJsonp([0],[
 	                min = Math.min(min, Math.min(d1, d2)); // min3
 	            }
 	            return min;
+	        }
+	    }, {
+	        key: "isConnected",
+	        value: function isConnected(points1, points2) {
+	            var rule = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+
+	            var radius1 = this.getRadius(points1);
+	            var radius2 = this.getRadius(points2);
+	            var minDis = this.cloudMinDistance(points1, points2);
+	            var minRadius = Math.min(radius1, radius2);
+
+	            if (minRadius * rule > minDis) {
+	                return true;
+	            }
+	            return false;
 	        }
 	    }, {
 	        key: "CloudDistance",
@@ -1081,6 +1286,21 @@ webpackJsonp([0],[
 	                i = (i + 1) % pts1.length;
 	            } while (i != start);
 	            return sum;
+	        }
+	    }, {
+	        key: "cloudMinDistance",
+	        value: function cloudMinDistance(points1, points2) {
+	            var _this = this;
+
+	            var minDis = +Infinity;
+	            points1.forEach(function (preItem) {
+	                points2.forEach(function (backItem) {
+	                    if (_this.Distance(preItem, backItem) < minDis) {
+	                        minDis = _this.Distance(preItem, backItem);
+	                    }
+	                });
+	            });
+	            return minDis;
 	        }
 	    }, {
 	        key: "getRadius",
@@ -1154,10 +1374,61 @@ webpackJsonp([0],[
 	exports.default = Util;
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin
+
+/***/ },
+/* 16 */,
+/* 17 */,
+/* 18 */,
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "background.html";
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "index.html";
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "popup.html";
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvMTI4LnBuZyI7"
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvMTYucG5nIjs="
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvMzIucG5nIjs="
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvNjQucG5nIjs="
+
+/***/ },
+/* 26 */
+/***/ function(module, exports) {
+
+	module.exports = "data:image/jpeg;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvYmFja2dyb3VuZC5qcGciOw=="
 
 /***/ }
 ]);

@@ -74,7 +74,7 @@ export default class PDollarRecognizer
                 u = i; // point-cloud
             }
         }
-        const result = (u == -1) ? { Name: "No match.", Score: 0 } : Object.assign({path: this.PointClouds[u].originPoints},{ Name: this.PointClouds[u].name, Score: Math.max((2.5 - b) / 2.5, 0.0) });
+        const result = (u == -1) ? { Name: "No match.", Score: 0 } : Object.assign({path: this.PointClouds[u].originPoints},{ Name: this.PointClouds[u].name, Score: Math.max((2.5 - b) / 2.5, 0) });
         return result;
     }
 
@@ -100,7 +100,6 @@ export default class PDollarRecognizer
         const edges = this.splitByEdge(points);
         const results = edges.filter(item => {
             const result = this.recognizeSingleEdge(item);
-            console.log(result);
             if (result.Score > 0.001)
             {
                 return true;
@@ -112,7 +111,7 @@ export default class PDollarRecognizer
 
     mergeEdgesToCLouds(cloudsByEdge)
     {
-        const clouds = cloudsByEdge.reduce((prev, curr) => prev.concat(curr));
+        const clouds = cloudsByEdge.reduce((prev, curr) => prev.concat(curr), []);
         return clouds;
     }
 

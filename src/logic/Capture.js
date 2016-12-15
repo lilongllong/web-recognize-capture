@@ -1,29 +1,44 @@
 import Circle from"./Circle";
 import Rectangle from "./Rectangle";
 import Vector from "./Vector";
+import config from "../config.json";
 
 export default class Capture {
     constructor()
     {
         this.watchElements = new Array();
     }
-
-    addWatchElements(element)
+// algnrith advance
+    addWatchElements(rootElement, element)
     {
-        this.watchElements.push(element);
+        this.watchElements.push({
+            rootElement,
+            element
+        });
+    }
+
+    watchDOMBySelector(selectors = "")
+    {
+        selectors = ".grid-container > .grid-item";
+        $(selectors).each((index, item) => {
+            this.addWatchElements(item, $(item).find(".grid-panel > .img-box > .img-a")[0]);
+            this.addWatchElements(item, $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0]);
+        });
     }
 
     getElementByCapture(location, range)
     {
         const result = this.watchElements.filter(item => {
-            const judge = this.filterJudgement(item, location, range);
+            const judge = this.filterJudgement(item.element, location, range);
+            console.log("judge", judge);
             if (judge)
             {
-                item.addClass("selected");
+
+                // $(item.rootElement).addClass("selected");
             }
             else
             {
-                item.removeClass("selected");
+                // $(item.rootElement).removeClass("selected");
             }
             return judge;
         });
@@ -32,20 +47,22 @@ export default class Capture {
 
     filterJudgement(element, location, range)
     {
-        const y = $(element).offset().top;
-        const x = $(element).offset().left;
-        const width = $(element).width();
-        const height = $(element).height();
+        const rect = this.getPositionOfElement(element);
+        const start = {
+            x: rect.left,
+            y: rect.top
+        };
         const end = {
-            x: x + width,
-            y: y + height,
+            x: rect.right,
+            y: rect.bottom
         };
 
-        return this.isJoined({x, y}, end, location, range);
+        return this.isJoined(start, end, location, range);
     }
 
     isJoined(rStart, rEnd, cLoc, cRadius)
     {
+        // console.log(rStart, rEnd, cLoc, cRadius);
         const circle = new Circle();
         circle.centerLocation = cLoc;
         circle.radius = cRadius;
@@ -76,5 +93,25 @@ export default class Capture {
             return u <= cRadius;
         }
         return false;
+    }
+
+    getPositionOfElement(element)
+    {
+        let x = 0;
+        let y = 0;
+        const width = element.offsetWidth;
+        const height = element.offsetHeight;
+
+        while( element && !isNaN( element.offsetLeft ) && !isNaN( element.offsetTop ) ) {
+            x += element.offsetLeft - element.scrollLeft;
+            y += element.offsetTop - element.scrollTop;
+            element = element.offsetParent;
+        }
+        return {
+            left: x,
+            right: x + width,
+            top: y,
+            bottom: y + height
+        };
     }
 }

@@ -360,17 +360,43 @@ webpackJsonp([0],[
 
 	            var selectors = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
 
-	            selectors = ".grid-container > .grid-item";
-	            $(selectors).each(function (index, item) {
-	                _this.addWatchElements(item, $(item).find(".grid-panel > .img-box > .img-a")[0]);
-	                _this.addWatchElements(item, $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0]);
+	            selectors = [".grid-container > .grid-item", ".grid-container .blank-row .grid-item"];
+	            selectors.forEach(function (selector) {
+	                console.log($(selector)[0]);
+	                $(selector).each(function (index, item) {
+	                    var img = $(item).find(".grid-panel > .img-box > .img-a")[0];
+	                    var text = $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0];
+	                    console.log(img);
+	                    if (img) {
+	                        _this.addWatchElements(item, $(item).find(".grid-panel > .img-box > .img-a")[0]);
+	                    }
+	                    if (text) {
+	                        _this.addWatchElements(item, $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0]);
+	                    }
+	                    // console.log("img", img);
+	                });
 	            });
+	            console.log(this.watchElements, "element");
+	        }
+	    }, {
+	        key: "updateWatchDom",
+	        value: function updateWatchDom() {
+	            var selectors = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+
+	            // selectors = ".grid-container > .grid-item";
+	            // const updatedDom = $(selectors);
+	            // if ( (updatedDom.length * 2) !== this.watchElements.length)
+	            // {
+	            this.watchElements = [];
+	            this.watchDOMBySelector(selectors);
+	            // }
 	        }
 	    }, {
 	        key: "getElementByCapture",
 	        value: function getElementByCapture(location, range) {
 	            var _this2 = this;
 
+	            this.updateWatchDom();
 	            var result = this.watchElements.filter(function (item) {
 	                var judge = _this2.filterJudgement(item.element, location, range);
 	                console.log("judge", judge);

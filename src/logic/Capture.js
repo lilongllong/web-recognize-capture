@@ -9,7 +9,7 @@ export default class Capture {
         this.watchElements = new Array();
     }
 // algnrith advance
-    addWatchElements(rootElement, element)
+    addWatchElements(rootElement, element, label)
     {
         this.watchElements.push({
             rootElement,
@@ -19,15 +19,35 @@ export default class Capture {
 
     watchDOMBySelector(selectors = "")
     {
-        selectors = ".grid-container > .grid-item";
-        $(selectors).each((index, item) => {
-            this.addWatchElements(item, $(item).find(".grid-panel > .img-box > .img-a")[0]);
-            this.addWatchElements(item, $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0]);
+        selectors = [ ".grid-container > .grid-item", ".grid-container .blank-row .grid-item"];
+        selectors.forEach(selector => {
+            console.log($(selector)[0]);
+            $(selector).each((index, item) => {
+                const img = $(item).find(".grid-panel > .img-box > .img-a")[0];
+                const text = $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0];
+                console.log(img);
+                if (img)
+                {
+                    this.addWatchElements(item, $(item).find(".grid-panel > .img-box > .img-a")[0], "img");
+                }
+                if (text)
+                {
+                    this.addWatchElements(item, $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0], "label");
+                }
+                // console.log("img", img);
+            });
         });
+    }
+
+    updateWatchDom(selectors = "")
+    {
+        this.watchElements = [];
+        this.watchDOMBySelector(selectors);
     }
 
     getElementByCapture(location, range)
     {
+        this.updateWatchDom();
         const result = this.watchElements.filter(item => {
             const judge = this.filterJudgement(item.element, location, range);
             console.log("judge", judge);

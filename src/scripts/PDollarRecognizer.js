@@ -55,7 +55,20 @@ export default class PDollarRecognizer
         const clouds = this.splitCloudBySpaceRange(filteredPoints);
         const results = new Array();
         clouds.forEach(cloud => {
-            const result = this.recognizeSingle(cloud);
+            let result = "";
+            
+            if (cloud.length < 10)
+            {
+                result = {
+                    Score: 0,
+                    Name: "无效序列"
+                }
+            }
+            else
+            {
+                const result = this.recognizeSingle(cloud);
+            }
+
             results.push(result);
         });
         return results;

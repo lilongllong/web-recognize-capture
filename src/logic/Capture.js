@@ -4,10 +4,10 @@ import Vector from "./Vector";
 import config from "../config.js";
 
 export default class Capture {
-    constructor()
+    constructor(args)
     {
         this.watchElements = new Array();
-        this.config = config.webConfig;
+        this.config = args.webConfig;
     }
 // algnrith advance
     addWatchElements(rootElement, element, label, domPath)

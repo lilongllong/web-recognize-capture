@@ -85,6 +85,7 @@ export default class Util
         let minDistance = +Infinity;
         let maxDisPointPair = null;
         let minDisPointPair = null;
+        const locationRange = this.getLocationRange(points);
         const length = points.length;
 
         for(let index = 0; index < (length - 1); index++)
@@ -116,14 +117,58 @@ export default class Util
                 "innerRadius": minDistance / 2,
                 "innerCentroid": this.centroidOfTwoPoint(minDisPointPair[0], minDisPointPair[1]),
                 "outerCentroid": this.centroidOfTwoPoint(maxDisPointPair[0], maxDisPointPair[1]),
-                "startX": Math.min(maxDisPointPair[0].X, maxDisPointPair[1].X),
-                "startY": Math.min(maxDisPointPair[0].Y, maxDisPointPair[1].Y),
-                "width": Math.abs(maxDisPointPair[0].X - minDisPointPair[1].X),
-                "height": Math.abs(maxDisPointPair[0].Y - minDisPointPair[1].Y)
+                "startX": locationRange.startX,
+                "startY": locationRange.startY,
+                "width": locationRange.width,
+                "height": locationRange.height
             };
         }
 
         return Math.max(maxX - minX, maxY - minY) / 2;
+    }
+
+    getLocationRange(points)
+    {
+        if (!points || points < 2)
+        {
+            return null;
+        }
+
+        let startX = +Infinity;
+        let startY = +Infinity;
+        let endX = -Infinity;
+        let endY = -Infinity;
+        const length = points.length;
+
+        for (let index = 0; index < length; index++)
+        {
+            if (startX > points[index].X)
+            {
+                startX = points[index].X;
+            }
+
+            if (startY > points[index].Y)
+            {
+                startY = points[index].Y;
+            }
+
+            if (endX < points[index].X)
+            {
+                endX = points[index].X;
+            }
+
+            if (endY < points[index].Y)
+            {
+                endY = points[index].Y;
+            }
+        }
+
+        return {
+            startX,
+            startY,
+            "width": Math.abs(endX - startX),
+            "height": Math.abs(endY - startY)
+        }
     }
 
     PathDistance(pts1, pts2) // average distance between corresponding points in two paths // 两个points平均偏移距离

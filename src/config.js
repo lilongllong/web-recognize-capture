@@ -27,7 +27,7 @@ export default {
         "diff": {
             "minRadius": 36,
             "maxRadius": 248,
-            "boundary": 70
+            "boundary": 100
         }
     }
 }

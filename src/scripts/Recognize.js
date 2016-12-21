@@ -9,16 +9,20 @@ import Util from "../logic/Util";
 
 export default class Recognize
 {
-    constructor()
+    constructor(args)
     {
-        this._init();
         this.NumPointClouds = 4;
         this.NumPoints = 32;
         this.Origin = new Point(0,0,0);
         this.util = Util.getInstance();
-        this.capture = new Capture();
+        this.capture = new Capture({
+            "webConfig": args.webConfig
+        });
         this._history = new Array();
+        this.webConfig = args.webConfig;
         this.config = config.noteConfig;
+
+        this._init();
     }
 
     _init()
@@ -27,14 +31,7 @@ export default class Recognize
                 <span style="background-color:#ffff88;">The &lt;canvas&gt; element is not supported by this browser.</span>
             </canvas>`);
         this._canvas = this._$recognize[0];
-        const waitListReady = setInterval(() => {
-            if ($(".grid-container.row").length)
-            {
-                this.onLoadEvent();
-                clearInterval(waitListReady);
-            }
-        }, 100);
-        $(window).ready(this.onLoadEvent.bind(this));
+        this.onLoadEvent();
         $(window).resize(() => {
             this.canvasResize();
         });
@@ -46,24 +43,26 @@ export default class Recognize
 
     canvasResize()
     {
+        const canvasPath = this.webConfig.listDOMSelector;
         setTimeout(() => {
-            this._canvas.width = $(".grid-container.row").width();
-            this._canvas.height = $(".grid-container.row").height();
+            this._canvas.width = $(canvasPath).width();
+            this._canvas.height = $(canvasPath).height();
             this._rc = this.getCanvasRect(this._canvas);
             this._g = this._canvas.getContext('2d');
-            console.log("resize", $(".grid-container.row").width(), $(".grid-container.row").height());
+            console.log("resize", $(canvasPath).width(), $(canvasPath).height());
         }, 300);
     }
 
     onLoadEvent()
     {
-        $(".grid-container.row").append(this._$recognize[0]);
+        const canvasPath = this.webConfig.listDOMSelector;
+        $(canvasPath).append(this._$recognize[0]);
         this.capture.watchDOMBySelector("default");
         this._points = new Array(); // point array for current stroke
         this._strokeID = 0;
         this._r = new PDollarRecognizer();
-        this._canvas.width = $(".grid-container.row").width();
-        this._canvas.height = $(".grid-container.row").height();
+        this._canvas.width = $(canvasPath).width();
+        this._canvas.height = $(canvasPath).height();
         this._rc = this.getCanvasRect(this._canvas);
 
         // this.canvasResize();
@@ -217,7 +216,14 @@ export default class Recognize
         console.log(allSelectedDom, "allSelectedDom");
         allSelectedDom.forEach(domItem => {
             const item = domItem.selectedDom;
+            const parentLocation = this.capture.getPositionOfElement(item.rootElement);
+            const offsetLeftStr = window.getComputedStyle(item.rootElement, null).getPropertyValue('margin-left');
+            const offsetTopStr = window.getComputedStyle(item.rootElement, null).getPropertyValue('margin-top');
+            console.log("offset", offsetTopStr, offsetLeftStr, item.rootElement);
             const range = domItem.range;
+
+            range.startX -= (parentLocation.left - parseInt(offsetLeftStr.substring(0, offsetLeftStr.length - 2)));
+            range.startY -= (parentLocation.top - parseInt(offsetTopStr.substring(0, offsetTopStr.length - 2)));
             console.log("range", range);
             $(item.element).addClass("test-selected");
             if (item.label === "label")

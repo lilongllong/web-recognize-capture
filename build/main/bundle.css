@@ -1,7 +1,9 @@
-.grid-container.row {
+.m-grid,
+.m-itemlist {
   position: relative;
 }
-.grid-container.row > .web-recognize-Content {
+.m-grid .web-recognize-Content,
+.m-itemlist .web-recognize-Content {
   position: absolute;
   top: 0;
   left: 0;
@@ -14,7 +16,8 @@
   opacity: 0.5;
   font-size: 18px;
 }
-.grid-container.row .test-selected {
+.m-grid .test-selected,
+.m-itemlist .test-selected {
   background-color: red;
   border: 2px solid red;
 }

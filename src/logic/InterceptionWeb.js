@@ -58,7 +58,11 @@ export default class InterceptionWeb {
         {
             console.log("clip range params exists error");
         }
-        const base64 = AlloyImage(dom).clip(parseInt(range.startX), parseInt(range.startY), parseInt(range.width), parseInt(range.height)).replace(dom).save("result.png", 0.9);
+
+        const base64 = AlloyImage(dom).clip(parseInt(range.startX),
+                parseInt(range.startY),
+                parseInt(range.width),
+                parseInt(range.height)).replace(dom).save("result.png", 0.9);
         return base64;
     }
 }

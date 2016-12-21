@@ -3,8 +3,7 @@ webpackJsonp([0],[
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(2);
-	__webpack_require__(28);
-	__webpack_require__(32);
+	__webpack_require__(29);
 	__webpack_require__(33);
 	__webpack_require__(34);
 	__webpack_require__(35);
@@ -12,7 +11,8 @@ webpackJsonp([0],[
 	__webpack_require__(37);
 	__webpack_require__(38);
 	__webpack_require__(39);
-	module.exports = __webpack_require__(40);
+	__webpack_require__(40);
+	module.exports = __webpack_require__(41);
 
 
 /***/ },
@@ -26,10 +26,39 @@ webpackJsonp([0],[
 
 	var _Recognize2 = _interopRequireDefault(_Recognize);
 
+	var _setting = __webpack_require__(28);
+
+	var _setting2 = _interopRequireDefault(_setting);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	$(function () {
-	    new _Recognize2.default();
+	var state = {
+	    "webType": null
+	};
+
+	$(document).ready(function () {
+	    setTimeout(function () {
+	        var webConfig = null;
+	        for (var key in _setting2.default) {
+	            var dom = $(_setting2.default[key].identification);
+	            console.log("dom", dom);
+	            if (dom && dom.length === 1) {
+	                // dom 存在
+	                state.webType = key;
+	                webConfig = _setting2.default[key].webConfig;
+	                break;
+	            }
+	        }
+
+	        if (!state.webType) {
+	            console.log("this webpage is not  a matched target webpage. ");
+	        } else {
+	            new _Recognize2.default({
+	                webConfig: webConfig,
+	                state: state
+	            });
+	        }
+	    }, 300);
 	});
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
@@ -85,17 +114,21 @@ webpackJsonp([0],[
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Recognize = function () {
-	    function Recognize() {
+	    function Recognize(args) {
 	        _classCallCheck(this, Recognize);
 
-	        this._init();
 	        this.NumPointClouds = 4;
 	        this.NumPoints = 32;
 	        this.Origin = new _Point2.default(0, 0, 0);
 	        this.util = _Util2.default.getInstance();
-	        this.capture = new _Capture2.default();
+	        this.capture = new _Capture2.default({
+	            "webConfig": args.webConfig
+	        });
 	        this._history = new Array();
+	        this.webConfig = args.webConfig;
 	        this.config = _config2.default.noteConfig;
+
+	        this._init();
 	    }
 
 	    _createClass(Recognize, [{
@@ -105,13 +138,7 @@ webpackJsonp([0],[
 
 	            this._$recognize = $("<canvas id=\"myCanvas\" class=\"web-recognize-Content\">\n                <span style=\"background-color:#ffff88;\">The &lt;canvas&gt; element is not supported by this browser.</span>\n            </canvas>");
 	            this._canvas = this._$recognize[0];
-	            var waitListReady = setInterval(function () {
-	                if ($(".grid-container.row").length) {
-	                    _this.onLoadEvent();
-	                    clearInterval(waitListReady);
-	                }
-	            }, 100);
-	            $(window).ready(this.onLoadEvent.bind(this));
+	            this.onLoadEvent();
 	            $(window).resize(function () {
 	                _this.canvasResize();
 	            });
@@ -133,24 +160,26 @@ webpackJsonp([0],[
 	        value: function canvasResize() {
 	            var _this2 = this;
 
+	            var canvasPath = this.webConfig.listDOMSelector;
 	            setTimeout(function () {
-	                _this2._canvas.width = $(".grid-container.row").width();
-	                _this2._canvas.height = $(".grid-container.row").height();
+	                _this2._canvas.width = $(canvasPath).width();
+	                _this2._canvas.height = $(canvasPath).height();
 	                _this2._rc = _this2.getCanvasRect(_this2._canvas);
 	                _this2._g = _this2._canvas.getContext('2d');
-	                console.log("resize", $(".grid-container.row").width(), $(".grid-container.row").height());
+	                console.log("resize", $(canvasPath).width(), $(canvasPath).height());
 	            }, 300);
 	        }
 	    }, {
 	        key: "onLoadEvent",
 	        value: function onLoadEvent() {
-	            $(".grid-container.row").append(this._$recognize[0]);
+	            var canvasPath = this.webConfig.listDOMSelector;
+	            $(canvasPath).append(this._$recognize[0]);
 	            this.capture.watchDOMBySelector("default");
 	            this._points = new Array(); // point array for current stroke
 	            this._strokeID = 0;
 	            this._r = new _PDollarRecognizer2.default();
-	            this._canvas.width = $(".grid-container.row").width();
-	            this._canvas.height = $(".grid-container.row").height();
+	            this._canvas.width = $(canvasPath).width();
+	            this._canvas.height = $(canvasPath).height();
 	            this._rc = this.getCanvasRect(this._canvas);
 
 	            // this.canvasResize();
@@ -298,7 +327,14 @@ webpackJsonp([0],[
 	            console.log(allSelectedDom, "allSelectedDom");
 	            allSelectedDom.forEach(function (domItem) {
 	                var item = domItem.selectedDom;
+	                var parentLocation = _this3.capture.getPositionOfElement(item.rootElement);
+	                var offsetLeftStr = window.getComputedStyle(item.rootElement, null).getPropertyValue('margin-left');
+	                var offsetTopStr = window.getComputedStyle(item.rootElement, null).getPropertyValue('margin-top');
+	                console.log("offset", offsetTopStr, offsetLeftStr, item.rootElement);
 	                var range = domItem.range;
+
+	                range.startX -= parentLocation.left - parseInt(offsetLeftStr.substring(0, offsetLeftStr.length - 2));
+	                range.startY -= parentLocation.top - parseInt(offsetTopStr.substring(0, offsetTopStr.length - 2));
 	                console.log("range", range);
 	                $(item.element).addClass("test-selected");
 	                if (item.label === "label") {
@@ -416,11 +452,11 @@ webpackJsonp([0],[
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Capture = function () {
-	    function Capture() {
+	    function Capture(args) {
 	        _classCallCheck(this, Capture);
 
 	        this.watchElements = new Array();
-	        this.config = _config2.default.webConfig;
+	        this.config = args.webConfig;
 	    }
 	    // algnrith advance
 
@@ -1008,7 +1044,7 @@ webpackJsonp([0],[
 	        "diff": {
 	            "minRadius": 36,
 	            "maxRadius": 248,
-	            "boundary": 70
+	            "boundary": 100
 	        }
 	    }
 	};
@@ -1796,6 +1832,7 @@ webpackJsonp([0],[
 	            if (!range || !range.startX || !range.startY || !range.width || !range.height) {
 	                console.log("clip range params exists error");
 	            }
+
 	            var base64 = AlloyImage(dom).clip(parseInt(range.startX), parseInt(range.startY), parseInt(range.width), parseInt(range.height)).replace(dom).save("result.png", 0.9);
 	            return base64;
 	        }
@@ -3195,6 +3232,7 @@ webpackJsonp([0],[
 	            var minDistance = +Infinity;
 	            var maxDisPointPair = null;
 	            var minDisPointPair = null;
+	            var locationRange = this.getLocationRange(points);
 	            var length = points.length;
 
 	            for (var index = 0; index < length - 1; index++) {
@@ -3219,14 +3257,52 @@ webpackJsonp([0],[
 	                    "innerRadius": minDistance / 2,
 	                    "innerCentroid": this.centroidOfTwoPoint(minDisPointPair[0], minDisPointPair[1]),
 	                    "outerCentroid": this.centroidOfTwoPoint(maxDisPointPair[0], maxDisPointPair[1]),
-	                    "startX": Math.min(maxDisPointPair[0].X, maxDisPointPair[1].X),
-	                    "startY": Math.min(maxDisPointPair[0].Y, maxDisPointPair[1].Y),
-	                    "width": Math.abs(maxDisPointPair[0].X - minDisPointPair[1].X),
-	                    "height": Math.abs(maxDisPointPair[0].Y - minDisPointPair[1].Y)
+	                    "startX": locationRange.startX,
+	                    "startY": locationRange.startY,
+	                    "width": locationRange.width,
+	                    "height": locationRange.height
 	                };
 	            }
 
 	            return Math.max(maxX - minX, maxY - minY) / 2;
+	        }
+	    }, {
+	        key: "getLocationRange",
+	        value: function getLocationRange(points) {
+	            if (!points || points < 2) {
+	                return null;
+	            }
+
+	            var startX = +Infinity;
+	            var startY = +Infinity;
+	            var endX = -Infinity;
+	            var endY = -Infinity;
+	            var length = points.length;
+
+	            for (var index = 0; index < length; index++) {
+	                if (startX > points[index].X) {
+	                    startX = points[index].X;
+	                }
+
+	                if (startY > points[index].Y) {
+	                    startY = points[index].Y;
+	                }
+
+	                if (endX < points[index].X) {
+	                    endX = points[index].X;
+	                }
+
+	                if (endY < points[index].Y) {
+	                    endY = points[index].Y;
+	                }
+	            }
+
+	            return {
+	                startX: startX,
+	                startY: startY,
+	                "width": Math.abs(endX - startX),
+	                "height": Math.abs(endY - startY)
+	            };
 	        }
 	    }, {
 	        key: "PathDistance",
@@ -3294,61 +3370,91 @@ webpackJsonp([0],[
 /* 28 */
 /***/ function(module, exports) {
 
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = {
+	    "key-search": {
+	        "identification": "#spulist-grid",
+	        "webConfig": {
+	            "listDOMSelector": ".m-grid",
+	            "itemSelectors": [".grid-container > .grid-item", ".grid-container .blank-row .grid-item"],
+	            "itemImgSelector": ".grid-panel > .img-box > .img-a",
+	            "itemTitleSelector": ".grid-panel > .info-cont > .title-row > .product-title"
+	        }
+	    },
+	    "fuzzy-search": {
+	        "identification": "#mainsrp-itemlist",
+	        "webConfig": {
+	            "listDOMSelector": ".m-itemlist",
+	            "itemSelectors": [".m-itemlist .items > .item", ".m-itemlist .items > .grid > .item"],
+	            "itemImgSelector": ".pic-box > pic-box-inner > .pic > pic-link",
+	            "itemTitleSelector": ".ctx-box > .title > a"
+	        }
+	    }
+	};
+
+/***/ },
+/* 29 */
+/***/ function(module, exports) {
+
 	// removed by extract-text-webpack-plugin
 
 /***/ },
-/* 29 */,
 /* 30 */,
 /* 31 */,
-/* 32 */
+/* 32 */,
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "background.html";
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "index.html";
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "popup.html";
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvMTI4LnBuZyI7"
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports) {
 
 	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvMTYucG5nIjs="
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports) {
 
 	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvMzIucG5nIjs="
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports) {
 
 	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvNjQucG5nIjs="
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports) {
 
 	module.exports = "data:image/jpeg;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvYmFja2dyb3VuZC5qcGciOw=="
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports) {
 
 	module.exports = "data:image/png;base64,bW9kdWxlLmV4cG9ydHMgPSBfX3dlYnBhY2tfcHVibGljX3BhdGhfXyArICIvaWNvbnMvaXRlbS5wbmciOw=="

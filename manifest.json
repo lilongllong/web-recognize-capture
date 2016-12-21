@@ -13,21 +13,33 @@
 
     "content_scripts": [
         {
-            "matches": [ "https://s.taobao.com/search*", "https://item.taobao.com/item.htm*" ],
-            "js": [ "build/alloyimage.js", "build/vendor.js", "build/main/bundle.js" ],
-            "css": [ "build/main/bundle.css" ],
-            "run_at": "document_end"
+          "matches": ["https://s.taobao.com/search?*", "https://item.taobao.com/item.htm*"],
+          "js": [
+              "lib/jquery-2.1.4.min.js",
+              "content/contentScript.js",
+              "build/alloyimage.js",
+              "build/vendor.js",
+              "build/main/bundle.js"
+          ],
+          "css": ["build/main/bundle.css"],
+          "run_at": "document_end"
         }
     ],
 
-    "browser_action": {
-        "default_icon": "build/icons/16.png",
-        "default_title": "chrome extension",
-        "default_popup": "build/popup.html"
+    "page_action": {
+        "default_icon": "resources/taobao.png",
+        "default_popup": "popup/popup.html",
+        "default_title": "Shopping Guide"
     },
 
     "background": {
-        "page": "build/background.html"
+        "scripts": [
+            "background/background.js",
+            "background/APICall.js",
+            "lib/jquery-2.1.4.min.js",
+            "lib/crypto-js/crypto-js.js"
+        ],
+        "persistent": false
     },
 
     "permissions": [

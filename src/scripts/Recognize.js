@@ -213,18 +213,15 @@ export default class Recognize
                 console.log(this._history);
             }
         });
-        console.log(allSelectedDom, "allSelectedDom");
         allSelectedDom.forEach(domItem => {
             const item = domItem.selectedDom;
             const parentLocation = this.capture.getPositionOfElement(item.rootElement);
             const offsetLeftStr = window.getComputedStyle(item.rootElement, null).getPropertyValue('margin-left');
             const offsetTopStr = window.getComputedStyle(item.rootElement, null).getPropertyValue('margin-top');
-            console.log("offset", offsetTopStr, offsetLeftStr, item.rootElement);
             const range = domItem.range;
 
             range.startX -= (parentLocation.left - parseInt(offsetLeftStr.substring(0, offsetLeftStr.length - 2)));
             range.startY -= (parentLocation.top - parseInt(offsetTopStr.substring(0, offsetTopStr.length - 2)));
-            console.log("range", range);
             $(item.element).addClass("test-selected");
             if (item.label === "label")
             {
@@ -238,7 +235,6 @@ export default class Recognize
         const imageRecognize = new ImageRecognize();
         const interceptionWeb =  new InterceptionWeb();
         interceptionWeb.domToImageLikePng(item.rootElement, range).then((img) => {
-            console.log("dom-img", img);
             imageRecognize.imageToText(item.rootElement).then(result => {
                 alert("text", result);
             })

@@ -50,7 +50,6 @@ export default class Capture {
         this.updateWatchDom();
         const result = this.watchElements.filter(item => {
             const judge = this.filterJudgement(item.element, location, range);
-            console.log("judge", judge);
             if (!judge)
             {
                 $(item.element).removeClass("test-selected");
@@ -71,7 +70,6 @@ export default class Capture {
             x: rect.right,
             y: rect.bottom
         };
-        console.log(start, end, location, range, "position");
         return this.isJoined(start, end, location, range);
     }
 

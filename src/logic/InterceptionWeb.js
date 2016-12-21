@@ -63,6 +63,8 @@ export default class InterceptionWeb {
                 parseInt(range.startY),
                 parseInt(range.width),
                 parseInt(range.height)).replace(dom).save("result.png", 0.9);
-        return base64;
+        const image = new Image();
+        image.src = base64;
+        return image;
     }
 }

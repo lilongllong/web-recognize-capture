@@ -1834,7 +1834,9 @@ webpackJsonp([0],[
 	            }
 
 	            var base64 = AlloyImage(dom).clip(parseInt(range.startX), parseInt(range.startY), parseInt(range.width), parseInt(range.height)).replace(dom).save("result.png", 0.9);
-	            return base64;
+	            var image = new Image();
+	            image.src = base64;
+	            return image;
 	        }
 	    }]);
 

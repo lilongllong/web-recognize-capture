@@ -25,11 +25,11 @@ export default class Util
 
     isConnected(points1, points2, rule = 1)
     {
-        const radius1 = this.getRadius(points1);
-        const radius2 = this.getRadius(points2);
+        const radius1 = this.getRange(points1).outerRadius;
+        const radius2 = this.getRange(points2).outerRadius;
         const minDis = this.cloudMinDistance(points1, points2);
         const minRadius = Math.min(radius1, radius2);
-        
+
         if ((minRadius * rule) >  minDis)
         {
             return true;
@@ -79,14 +79,48 @@ export default class Util
         return minDis;
     }
 
-    getRadius(points)
+    getRange(points)
     {
-        var minX = +Infinity, maxX = -Infinity, minY = +Infinity, maxY = -Infinity;
-        for (var i = 0; i < points.length; i++) {
-            minX = Math.min(minX, points[i].X);
-            minY = Math.min(minY, points[i].Y);
-            maxX = Math.max(maxX, points[i].X);
-            maxY = Math.max(maxY, points[i].Y);
+        let maxDistance = 0;
+        let minDistance = +Infinity;
+        let maxDisPointPair = null;
+        let minDisPointPair = null;
+        const length = points.length;
+
+        for(let index = 0; index < (length - 1); index++)
+        {
+            for (let next = (index + 1); next < length; next++)
+            {
+                const curDistance = this.Distance(points[index], points[next]);
+                if (curDistance > maxDistance)
+                {
+                    maxDistance = curDistance;
+                    maxDisPointPair = [ points[index], points[next] ];
+                }
+                if (curDistance < minDistance)
+                {
+                    minDistance = curDistance;
+                    minDisPointPair = [ points[index], points[next] ];
+                }
+            }
+        }
+
+        if (!maxDisPointPair && !minDisPointPair)
+        {
+            return null;
+        }
+        else
+        {
+            return {
+                "outerRadius": maxDistance / 2,
+                "innerRadius": minDistance / 2,
+                "innerCentroid": this.centroidOfTwoPoint(minDisPointPair[0], minDisPointPair[1]),
+                "outerCentroid": this.centroidOfTwoPoint(maxDisPointPair[0], maxDisPointPair[1]),
+                "startX": Math.min(maxDisPointPair[0].X, maxDisPointPair[1].X),
+                "startY": Math.min(maxDisPointPair[0].Y, maxDisPointPair[1].Y),
+                "width": Math.abs(maxDisPointPair[0].X - minDisPointPair[1].X),
+                "height": Math.abs(maxDisPointPair[0].Y - minDisPointPair[1].Y)
+            };
         }
 
         return Math.max(maxX - minX, maxY - minY) / 2;
@@ -116,6 +150,13 @@ export default class Util
         const dx = p2.X - p1.X;
         const dy = p2.Y - p1.Y;
         return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    centroidOfTwoPoint(p1, p2)
+    {
+        const dx = (p2.X + p1.X) / 2;
+        const dy = (p2.Y + p1.Y) / 2;
+        return { "x": dx, "y": dy };
     }
 
     rand(low, high)

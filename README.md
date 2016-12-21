@@ -36,3 +36,13 @@
 - DOM的定位
 - DOM及祖先节点的返回
 - DOM类型的标签化
+
+
+###
+- 屏幕分辨率
+- 识别精度
+- DOM-path + DOM tree
+- dom label + dom path + 笔迹 前段需要
+- dom树 + dom-path + 笔迹 后端需要
+- title识别：ocr方法，需要笔迹+title字符串+截图
+- 位置变化（自增自减), 数据点也要更新

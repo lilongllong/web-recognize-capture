@@ -1,40 +1,40 @@
-import Circle from"./Circle";
+import Circle from "./Circle";
 import Rectangle from "./Rectangle";
 import Vector from "./Vector";
-import config from "../config.json";
+import config from "../config.js";
 
 export default class Capture {
     constructor()
     {
         this.watchElements = new Array();
+        this.config = config.webConfig;
     }
 // algnrith advance
-    addWatchElements(rootElement, element, label)
+    addWatchElements(rootElement, element, label, domPath)
     {
         this.watchElements.push({
             rootElement,
-            element
+            element,
+            label,
+            domPath
         });
     }
 
     watchDOMBySelector(selectors = "")
     {
-        selectors = [ ".grid-container > .grid-item", ".grid-container .blank-row .grid-item"];
+        selectors = this.config.itemSelectors;
         selectors.forEach(selector => {
-            console.log($(selector)[0]);
             $(selector).each((index, item) => {
-                const img = $(item).find(".grid-panel > .img-box > .img-a")[0];
-                const text = $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0];
-                console.log(img);
+                const img = $(item).find(this.config.itemImgSelector)[0];
+                const text = $(item).find(this.config.itemTitleSelector)[0];
                 if (img)
                 {
-                    this.addWatchElements(item, $(item).find(".grid-panel > .img-box > .img-a")[0], "img");
+                    this.addWatchElements(item, img, "img", this.config.itemImgSelector);
                 }
                 if (text)
                 {
-                    this.addWatchElements(item, $(item).find(".grid-panel > .info-cont > .title-row > .product-title")[0], "label");
+                    this.addWatchElements(item, text, "label", this.config.itemTitleSelector);
                 }
-                // console.log("img", img);
             });
         });
     }
@@ -51,14 +51,9 @@ export default class Capture {
         const result = this.watchElements.filter(item => {
             const judge = this.filterJudgement(item.element, location, range);
             console.log("judge", judge);
-            if (judge)
+            if (!judge)
             {
-
-                // $(item.rootElement).addClass("selected");
-            }
-            else
-            {
-                // $(item.rootElement).removeClass("selected");
+                $(item.element).removeClass("test-selected");
             }
             return judge;
         });
@@ -76,13 +71,12 @@ export default class Capture {
             x: rect.right,
             y: rect.bottom
         };
-
+        console.log(start, end, location, range, "position");
         return this.isJoined(start, end, location, range);
     }
 
     isJoined(rStart, rEnd, cLoc, cRadius)
     {
-        // console.log(rStart, rEnd, cLoc, cRadius);
         const circle = new Circle();
         circle.centerLocation = cLoc;
         circle.radius = cRadius;
@@ -122,9 +116,17 @@ export default class Capture {
         const width = element.offsetWidth;
         const height = element.offsetHeight;
 
-        while( element && !isNaN( element.offsetLeft ) && !isNaN( element.offsetTop ) ) {
-            x += element.offsetLeft - element.scrollLeft;
-            y += element.offsetTop - element.scrollTop;
+        while( element && !isNaN( element.offsetLeft ) && !isNaN( element.offsetTop )) {
+            try {
+                if ($(element).hasClass(this.config.listDOMSelector.slice(1)))
+                {
+                    break;
+                }
+            } catch (e) {
+                console.log("nothing");
+            }
+            x += element.offsetLeft;
+            y += element.offsetTop;
             element = element.offsetParent;
         }
         return {

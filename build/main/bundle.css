@@ -14,6 +14,7 @@
   opacity: 0.5;
   font-size: 18px;
 }
-.grid-container.row > .selected.grid-item {
+.grid-container.row .test-selected {
+  background-color: red;
   border: 2px solid red;
 }

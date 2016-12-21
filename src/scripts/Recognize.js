@@ -1,8 +1,11 @@
 import Capture from "../logic/Capture";
+import config from "../config.js";
+import ImageRecognize from "../logic/ImageRecognize";
+import InterceptionWeb from "../logic/InterceptionWeb";
 import PDollarRecognizer from "./PDollarRecognizer";
 import Point from "./Point";
 import PointCloud from "./PointCloud";
-import Util from "./Util";
+import Util from "../logic/Util";
 
 export default class Recognize
 {
@@ -14,6 +17,8 @@ export default class Recognize
         this.Origin = new Point(0,0,0);
         this.util = Util.getInstance();
         this.capture = new Capture();
+        this._history = new Array();
+        this.config = config.noteConfig;
     }
 
     _init()
@@ -30,20 +35,25 @@ export default class Recognize
             }
         }, 100);
         $(window).ready(this.onLoadEvent.bind(this));
+        $(window).resize(() => {
+            this.canvasResize();
+        });
         $(this._canvas).on("mouseup", (event) => { this.mouseUpEvent(event.offsetX, event.offsetY, event.button); });
         $(this._canvas).on("mousedown", (event) => { this.mouseDownEvent(event.offsetX, event.offsetY, event.button); });
         $(this._canvas).on("mousemove", (event) => { this.mouseMoveEvent(event.offsetX, event.offsetY, event.button); });
         $(this._canvas).on("contextmenu", () => false);
     }
 
-    // canvasResize()
-    // {
-    //     this._canvas.width = window.innerWidth;
-    //     this._canvas.height = window.innerHeight;
-    //     this._rc = this.getCanvasRect(this._canvas);
-    //     this._canvas.style.left = this._rc.x + "px";
-    //     this._canvas.style.top = this._rc.y + "px";
-    // }
+    canvasResize()
+    {
+        setTimeout(() => {
+            this._canvas.width = $(".grid-container.row").width();
+            this._canvas.height = $(".grid-container.row").height();
+            this._rc = this.getCanvasRect(this._canvas);
+            this._g = this._canvas.getContext('2d');
+            console.log("resize", $(".grid-container.row").width(), $(".grid-container.row").height());
+        }, 300);
+    }
 
     onLoadEvent()
     {
@@ -135,29 +145,13 @@ export default class Recognize
             {
                 this._isDown = false;
                 this.drawText("Stroke #" + this._strokeID + " recorded.");
-                // let result = this._r.Recognize(this._points);
-                // console.log(result.Score, "正确率");
-                // if (result.Score > 0.001)
-                // {
-                //     this.drawText("Result: " + result.Name + " (" + this.util.round(result.Score,3) + ").");
-                // }
             }
         }
         else if (button == 2) // segmentation with right-click
         {
             if (this._points.length >= 10)
             {
-                let results = this._r.Recognize(this._points);
-                results.map(result => {
-                    this.drawText("Result: " + result.Name + " (" + this.util.round(result.Score,2) + ").");
-                    console.log("Result: " + result.Name + " (" + this.util.round(result.Score,2) + ").");
-                    if (result.Score !== 0)
-                    {
-                        const centroid = new PointCloud({ name: "test", points: result.path }).Centroid();
-                        const selectedDom = this.capture.getElementByCapture({ x: centroid.X, y: centroid.Y}, this.util.getRadius(result.path));
-                        console.log(selectedDom);        
-                    }
-                });
+                this.analyzeAndCapture();
                 let gesObj = new Object();
                 gesObj.action = "gesture";
                 gesObj.points = this._points;
@@ -166,8 +160,83 @@ export default class Recognize
             {
                 this.drawText("Too little input made. Please try again.");
             }
-            this._strokeID = 0; // signal to begin new gesture on next mouse-down
+            this._strokeID = 0;
+            this._points = new Array();
+             // signal to begin new gesture on next mouse-down
         }
+    }
+
+    analyzeAndCapture()
+    {
+        let results = this._r.Recognize(this._points);
+        let allSelectedDom = new Array();
+        results.map(result => {
+            this.drawText("Result: " + this.config.noteType[result.Name] + " (" + this.util.round(result.Score,2) + ").");
+            console.log("Result: " + this.config.noteType[result.Name] + " (" + this.util.round(result.Score,2) + ").");
+            if (result.type === "2" && result.Score > 0.01)
+            {
+                const range = this.util.getRange(result.path);
+                let selectedDom = null;
+                let radius = null;
+                // not confirmed cross
+                if (result.Name === "10" || result.Name === "20")
+                {
+                    let type = parseInt(result.Name);
+                    if (range.outerRadius < this.config.diff.boundary)
+                    {
+                        result.Name = `${ type + 1 }`;
+                    }
+                    else
+                    {
+                        resutl.Name = `${ type + 2 }`;
+                    }
+                }
+
+                selectedDom = this.capture.getElementByCapture(range.outerCentroid, range.outerRadius).map( item => {
+                    return {
+                        "selectedDom": item,
+                        "range": {
+                            "startX": range.startX,
+                            "startY": range.startY,
+                            "width": range.width,
+                            "height": range.height
+                        }
+                     }
+                });
+
+                allSelectedDom.push(...selectedDom);
+                this._history.push({
+                    "points": result.path,
+                    "shape": result.Name,
+                    "Dom": selectedDom, // 之后替换成project's or commodity's ID
+                    "confidenceLevel": result.Score
+                });
+                console.log(this._history);
+            }
+        });
+        console.log(allSelectedDom, "allSelectedDom");
+        allSelectedDom.forEach(domItem => {
+            const item = domItem.selectedDom;
+            const range = domItem.range;
+            console.log("range", range);
+            $(item.element).addClass("test-selected");
+            if (item.label === "label")
+            {
+                this.labelExtract(item, range);
+            }
+        });
+    }
+
+    labelExtract(item, range)
+    {
+        const imageRecognize = new ImageRecognize();
+        const interceptionWeb =  new InterceptionWeb();
+        interceptionWeb.domToImageLikePng(item.rootElement, range).then((img) => {
+            console.log("dom-img", img);
+            imageRecognize.imageToText(item.rootElement).then(result => {
+                alert("text", result);
+            })
+        });
     }
 
     drawConnectedPoint(from, to)

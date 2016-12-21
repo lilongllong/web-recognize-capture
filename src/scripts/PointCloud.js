@@ -1,5 +1,5 @@
 import Point from "./Point";
-import Util from "./Util";
+import Util from "../logic/Util";
 
 export default class PointCloud
 {

@@ -1,44 +1,46 @@
+import config from "../config.js";
 import Point from "./Point";
 import PointCloud from "./PointCloud";
-import Util from "./Util";
+import Util from "../logic/Util";
 
 export default class PDollarRecognizer
 {
     constructor()
     {
+        this.config = config.inputType;
         const NumPointClouds = 4;
         this.PointClouds = new Array(NumPointClouds);
         this.subPoints = new Array(4);
-        this.PointClouds[0] = new PointCloud({ name: "↑", points: new Array(
+        this.PointClouds[0] = new PointCloud({ name: "31", points: new Array(
             new Point(100,0,1),new Point(0,100,1),
             new Point(100,0,2),new Point(200,100,2),
             new Point(100,0,3),new Point(0,300,3)
         ) });
-        this.PointClouds[1] = new PointCloud({ name: "↓", points: new Array(
+        this.PointClouds[1] = new PointCloud({ name: "41", points: new Array(
             new Point(100,0,1),new Point(0,300,1),
             new Point(0,200,2),new Point(100,300,2),
             new Point(200,200,2)
         ) });
-        this.PointClouds[2] = new PointCloud({ name: "×", points: new Array(
+        this.PointClouds[2] = new PointCloud({ name: "20", points: new Array(
             new Point(0,0,1),new Point(100,100,1),
             new Point(200,200,1),new Point(200,0,2),
             new Point(100,100,2),new Point(0,200,2)
         ) });
         const pai = 100 * Math.sqrt(2);
-        this.PointClouds[3] = new PointCloud({ name: "circle", points: new Array(
+        this.PointClouds[3] = new PointCloud({ name: "10", points: new Array(
             new Point(0,100,1),new Point(100 - pai, 100 + pai,1),
             new Point(100,200,1),new Point(100 + pai, 100 + pai, 1),
             new Point(200,100,1),new Point(100 + pai, 100 - pai,1),
             new Point(100,0,1),new Point(100 - pai, 100 - pai, 1)
         )});
 
-        this.subPoints[0] = new PointCloud({ name: "/", points: new Array(
+        this.subPoints[0] = new PointCloud({ name: "01", points: new Array(
             new Point(100,0,1), new Point(0,100,1)
         )});
-        this.subPoints[1] = new PointCloud({ name: "\\", points: new Array(
+        this.subPoints[1] = new PointCloud({ name: "02", points: new Array(
             new Point(0,0,1), new Point(100,100,1)
         )});
-        this.subPoints[2] = new PointCloud({ name: "|", points: new Array(
+        this.subPoints[2] = new PointCloud({ name: "03", points: new Array(
             new Point(0,0,1), new Point(0,100,1)
         )});
         this.subPoints[3] = new PointCloud({ name: "circle", points: new Array(
@@ -56,17 +58,21 @@ export default class PDollarRecognizer
         const results = new Array();
         clouds.forEach(cloud => {
             let result = "";
-            
-            if (cloud.length < 10)
+
+            if (cloud.length < 2)
             {
                 result = {
                     Score: 0,
-                    Name: "无效序列"
+                    Name: "无效序列",
+                    type: "0",
+                    path: cloud,
+                    domPath: "",
+                    label: ""
                 }
             }
             else
             {
-                const result = this.recognizeSingle(cloud);
+                result = this.recognizeSingle(cloud);
             }
 
             results.push(result);
@@ -87,7 +93,7 @@ export default class PDollarRecognizer
                 u = i; // point-cloud
             }
         }
-        const result = (u == -1) ? { Name: "No match.", Score: 0 } : Object.assign({path: this.PointClouds[u].originPoints},{ Name: this.PointClouds[u].name, Score: Math.max((2.5 - b) / 2.5, 0) });
+        const result = (u === -1) ? { Name: "No match.", Score: 0, type: "0" } : Object.assign({path: points, type: "2"},{ Name: this.PointClouds[u].name, Score: Math.max((2.5 - b) / 2.5, 0) });
         return result;
     }
 

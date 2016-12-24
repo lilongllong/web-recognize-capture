@@ -496,7 +496,7 @@ webpackJsonp([0],[
 	                                result = imgDoms.map(function (domItem) {
 	                                    return {
 	                                        "rootDom": domItem.selectedDom.rootElement,
-	                                        "imgDoms": domItem.selectedDom.element,
+	                                        "imgDoms": $(domItem.selectedDom.element).children("img")[0],
 	                                        "type": domItem.shape
 	                                    };
 	                                });
@@ -524,7 +524,7 @@ webpackJsonp([0],[
 	            }
 	            console.log("i have run at this state.");
 	            var containerDivs = imgDoms.map(function (item) {
-	                return item.rootElement;
+	                return item.rootDom;
 	            });
 	            var imgDivs = imgDoms.map(function (item) {
 	                return item.imgDoms;
@@ -4552,7 +4552,7 @@ webpackJsonp([0],[
 	  }, {
 	    key: "filterDom",
 	    value: function filterDom(containerDivList, imgDivList, typeList) {
-
+	      console.log("param", containerDivList, imgDivList, typeList);
 	      var page_style = this.getPageStyle();
 
 	      for (var i = 0; i < containerDivList.length; i++) {
@@ -4561,6 +4561,7 @@ webpackJsonp([0],[
 	        var cur_type = typeList[i];
 
 	        var cur_id = this.getProductIdFromImg(cur_img);
+	        console.log("cur_id", cur_id);
 	        if (cur_id == "") continue;
 
 	        // 大叉，黑名单，直接删除商品，并填补造成的页面空缺
@@ -4602,11 +4603,11 @@ webpackJsonp([0],[
 	      if (href == undefined || href == null) {
 	        return "";
 	      }
-
 	      var id = href.match(/id=([^&]*)&/);
 	      if (id == null) {
 	        return "";
 	      }
+	      console.log("id", id);
 
 	      return id[1];
 	    }
@@ -4655,7 +4656,6 @@ webpackJsonp([0],[
 	        var img = a.children().eq(0);
 	        img[0].id = "J_Itemlist_Pic_" + newProduct.num_iid;
 	        img[0].src = newProduct.pict_url;
-	        img[0].currentSrc = newProduct.pict_url;
 	        img[0].alt = newProduct.title;
 
 	        // 删除天猫，保险理赔，旺旺等信息
@@ -4707,7 +4707,6 @@ webpackJsonp([0],[
 	        var _img = _a.children().eq(0);
 	        _img[0].id = "J_Itemlist_Pic_" + newProduct.num_iid;
 	        _img[0].src = newProduct.pict_url;
-	        _img[0].currentSrc = newProduct.pict_url;
 	        _img[0].alt = newProduct.title;
 	        _img.bind("mouseover", function (e) {
 	          return false;

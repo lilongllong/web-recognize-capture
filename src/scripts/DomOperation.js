@@ -59,7 +59,7 @@ export default class DomOperation {
      */
 
     filterDom(containerDivList, imgDivList, typeList) {
-
+        console.log("param", containerDivList, imgDivList, typeList);
     	let page_style = this.getPageStyle();
 
     	for (let i = 0; i < containerDivList.length; i++) {
@@ -68,6 +68,7 @@ export default class DomOperation {
     		let cur_type = typeList[i];
 
     		let cur_id = this.getProductIdFromImg(cur_img);
+            console.log("cur_id", cur_id);
     		if (cur_id == "")
     			continue;
 
@@ -107,11 +108,11 @@ export default class DomOperation {
     	if (href == undefined || href == null) {
     		return "";
     	}
-
     	let id = href.match(/id=([^&]*)&/);
     	if (id == null) {
     		return "";
     	}
+        console.log("id", id);
 
     	return id[1];
     }
@@ -154,7 +155,6 @@ export default class DomOperation {
     		let img = a.children().eq(0);
     		img[0].id = "J_Itemlist_Pic_" + newProduct.num_iid;
     		img[0].src = newProduct.pict_url;
-    		img[0].currentSrc = newProduct.pict_url;
     		img[0].alt = newProduct.title;
 
     		// 删除天猫，保险理赔，旺旺等信息
@@ -207,7 +207,6 @@ export default class DomOperation {
     		let img = a.children().eq(0);
     		img[0].id = "J_Itemlist_Pic_" + newProduct.num_iid;
     		img[0].src = newProduct.pict_url;
-    		img[0].currentSrc = newProduct.pict_url;
     		img[0].alt = newProduct.title;
     		img.bind("mouseover",(e) => {
             	return false;

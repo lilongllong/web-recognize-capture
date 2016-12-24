@@ -262,7 +262,7 @@ export default class Recognize
         const result = imgDoms.map(domItem => {
             return {
                 "rootDom": domItem.selectedDom.rootElement,
-                "imgDoms": domItem.selectedDom.element,
+                "imgDoms": $(domItem.selectedDom.element).children("img")[0],
                 "type": domItem.shape
             };
         });
@@ -277,7 +277,7 @@ export default class Recognize
             return false;
         }
         console.log("i have run at this state.");
-        const containerDivs = imgDoms.map(item => item.rootElement);
+        const containerDivs = imgDoms.map(item => item.rootDom);
         const imgDivs = imgDoms.map(item => item.imgDoms);
         const typeList = imgDoms.map(item => {
             return (item.type.includes("circle") ? "SIGN_WHITE" : "SIGN_BLACK");

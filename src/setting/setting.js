@@ -14,7 +14,7 @@ export default {
         "webConfig": {
             "listDOMSelector": ".m-itemlist",
             "itemSelectors": [".m-itemlist .items > .item", ".m-itemlist .items > .grid > .item"],
-            "itemImgSelector": ".pic-box > pic-box-inner > .pic > pic-link",
+            "itemImgSelector": ".pic-box > .pic-box-inner > .pic > .pic-link",
             "itemTitleSelector": ".ctx-box > .title > a"
         }
     }

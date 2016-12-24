@@ -1,5 +1,6 @@
 import Capture from "../logic/Capture";
 import config from "../config.js";
+import DomOperation from "./DomOperation";
 import ImageRecognize from "../logic/ImageRecognize";
 import InterceptionWeb from "../logic/InterceptionWeb";
 import PDollarRecognizer from "./PDollarRecognizer";
@@ -18,6 +19,7 @@ export default class Recognize
         this.capture = new Capture({
             "webConfig": args.webConfig
         });
+        this.domOperation = new DomOperation();
         this._history = new Array();
         this.webConfig = args.webConfig;
         this.config = config.noteConfig;
@@ -31,6 +33,8 @@ export default class Recognize
                 <span style="background-color:#ffff88;">The &lt;canvas&gt; element is not supported by this browser.</span>
             </canvas>`);
         this._canvas = this._$recognize[0];
+        const canvasPath = this.webConfig.listDOMSelector;
+        $(canvasPath).append(this._$recognize[0]);
         this.onLoadEvent();
         $(window).resize(() => {
             this.canvasResize();
@@ -39,6 +43,16 @@ export default class Recognize
         $(this._canvas).on("mousedown", (event) => { this.mouseDownEvent(event.offsetX, event.offsetY, event.button); });
         $(this._canvas).on("mousemove", (event) => { this.mouseMoveEvent(event.offsetX, event.offsetY, event.button); });
         $(this._canvas).on("contextmenu", () => false);
+    }
+
+    domDetach()
+    {
+        $(this._canvas).detach();
+    }
+
+    domAttach()
+    {
+        $(this.webConfig.listDOMSelector).append(this._canvas);
     }
 
     canvasResize()
@@ -56,7 +70,6 @@ export default class Recognize
     onLoadEvent()
     {
         const canvasPath = this.webConfig.listDOMSelector;
-        $(canvasPath).append(this._$recognize[0]);
         this.capture.watchDOMBySelector("default");
         this._points = new Array(); // point array for current stroke
         this._strokeID = 0;
@@ -103,8 +116,6 @@ export default class Recognize
         if (button <= 1)
         {
             this._isDown = true;
-            // x -= this._rc.x;
-            // y -= this._rc.y - this.getScrollY();
             if (this._strokeID == 0) // starting a new gesture
             {
                 this._points.length = 0;
@@ -127,8 +138,6 @@ export default class Recognize
     {
         if (this._isDown)
         {
-            // x -= this._rc.x;
-            // y -= this._rc.y - this.getScrollY();
             this._points[this._points.length] = new Point(x, y, this._strokeID); // append
             this.drawConnectedPoint(this._points.length - 2, this._points.length - 1);
         }
@@ -165,13 +174,13 @@ export default class Recognize
         }
     }
 
-    analyzeAndCapture()
+    async analyzeAndCapture()
     {
         let results = this._r.Recognize(this._points);
         let allSelectedDom = new Array();
         results.map(result => {
             this.drawText("Result: " + this.config.noteType[result.Name] + " (" + this.util.round(result.Score,2) + ").");
-            console.log("Result: " + this.config.noteType[result.Name] + " (" + this.util.round(result.Score,2) + ").");
+            console.log("Result: " + this.config.noteType[result.Name] + " (" + this.util.round(result.Score,2) + ").", result);
             if (result.type === "2" && result.Score > 0.01)
             {
                 const range = this.util.getRange(result.path);
@@ -187,7 +196,7 @@ export default class Recognize
                     }
                     else
                     {
-                        resutl.Name = `${ type + 2 }`;
+                        result.Name = `${ type + 2 }`;
                     }
                 }
 
@@ -199,10 +208,13 @@ export default class Recognize
                             "startY": range.startY,
                             "width": range.width,
                             "height": range.height
-                        }
-                     }
+                        },
+                        "points": result.path,
+                        "shape": this.config.noteType[result.Name],
+                        "confidenceLevel": result.Score
+                    };
                 });
-
+                console.log("selectedDom", selectedDom);
                 allSelectedDom.push(...selectedDom);
                 this._history.push({
                     "points": result.path,
@@ -210,10 +222,21 @@ export default class Recognize
                     "Dom": selectedDom, // 之后替换成project's or commodity's ID
                     "confidenceLevel": result.Score
                 });
-                console.log(this._history);
             }
         });
-        allSelectedDom.forEach(domItem => {
+        console.log("allSelectedDom", allSelectedDom);
+        const filterTitleDoms = allSelectedDom.filter(item => item.selectedDom.label === "label");
+        const filterImgDoms = allSelectedDom.filter(item => item.selectedDom.label === "img");
+        const titleDoms = await this.getTitleDoms(filterTitleDoms);
+        const imgDoms = await this.getImgDoms(filterImgDoms);
+        console.log("titleDoms", titleDoms);
+        console.log("imgDoms", imgDoms);
+        this.operationDoms(imgDoms);
+    }
+
+    async getTitleDoms(titleDoms)
+    {
+        const result = await Promise.all(titleDoms.map(async (domItem) => {
             const item = domItem.selectedDom;
             const parentLocation = this.capture.getPositionOfElement(item.rootElement);
             const offsetLeftStr = window.getComputedStyle(item.rootElement, null).getPropertyValue('margin-left');
@@ -222,22 +245,59 @@ export default class Recognize
 
             range.startX -= (parentLocation.left - parseInt(offsetLeftStr.substring(0, offsetLeftStr.length - 2)));
             range.startY -= (parentLocation.top - parseInt(offsetTopStr.substring(0, offsetTopStr.length - 2)));
-            $(item.element).addClass("test-selected");
-            if (item.label === "label")
-            {
-                this.labelExtract(item, range);
-            }
+            const title = await this.labelExtract(item, range);
+            return {
+                "rootDom": item.rootElement,
+                "titleDom": item.element,
+                "type": domItem.shape,
+                "title": title.text
+            };
+        }));
+
+        return result;
+    }
+
+    async getImgDoms(imgDoms)
+    {
+        const result = imgDoms.map(domItem => {
+            return {
+                "rootDom": domItem.selectedDom.rootElement,
+                "imgDoms": domItem.selectedDom.element,
+                "type": domItem.shape
+            };
         });
+
+        return result;
+    }
+
+    operationDoms(imgDoms)
+    {
+        if (!imgDoms || imgDoms.length < 1)
+        {
+            return false;
+        }
+        console.log("i have run at this state.");
+        const containerDivs = imgDoms.map(item => item.rootElement);
+        const imgDivs = imgDoms.map(item => item.imgDoms);
+        const typeList = imgDoms.map(item => {
+            return (item.type.includes("circle") ? "SIGN_WHITE" : "SIGN_BLACK");
+        });
+        this.domOperation.filter(containerDivs, imgDivs, typeList);
     }
 
     labelExtract(item, range)
     {
-        const imageRecognize = new ImageRecognize();
-        const interceptionWeb =  new InterceptionWeb();
-        interceptionWeb.domToImageLikePng(item.rootElement, range).then((img) => {
-            imageRecognize.imageToText(item.rootElement).then(result => {
-                alert("text", result);
-            })
+        return new Promise((resolve, reject) => {
+            const imageRecognize = new ImageRecognize();
+            const interceptionWeb =  new InterceptionWeb();
+            interceptionWeb.domToImageLikePng(item.rootElement, range).then((img) => {
+                setTimeout(() => {
+                    img.width = 500;
+                    imageRecognize.imageToText(img).then(result => {
+                        resolve(result);
+                    })
+                }, 500);
+            });
         });
     }
 
@@ -258,41 +318,5 @@ export default class Recognize
         $_g.font = "40px Arial";
         $_g.fillStyle = "rgb(0,0,255)";
         $_g.fillText(str, 1, 35);
-    }
-
-    //
-    // Multistroke Adding and Clearing
-    //
-    onClickAddExisting()
-    {
-        if (this._points.length >= 10)
-        {
-            var pointclouds = document.getElementById('pointclouds');
-            var name = pointclouds[pointclouds.selectedIndex].value;
-            var num = this._r.AddGesture(name, this._points);
-            this.drawText("\"" + name + "\" added. Number of \"" + name + "\"s defined: " + num + ".");
-            this._strokeID = 0; // signal to begin new gesture on next mouse-down
-        }
-    }
-
-    onClickAddCustom()
-    {
-        var name = document.getElementById('custom').value;
-        if (this._points.length >= 10 && name.length > 0)
-        {
-            var num = this._r.AddGesture(name, this._points);
-            drawText("\"" + name + "\" added. Number of \"" + name + "\"s defined: " + num + ".");
-            this._strokeID = 0; // signal to begin new gesture on next mouse-down
-            var custgesObj = new Object();
-            custgesObj.action = "custGesture";
-            custgesObj.points = this._points;
-            custgesObj.name = name;
-            // ws.send(JSON.stringify(custgesObj));
-        }
-    }
-
-    onClickCustom()
-    {
-        document.getElementById('custom').select();
     }
 }

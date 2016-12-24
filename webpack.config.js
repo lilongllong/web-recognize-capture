@@ -29,8 +29,12 @@ module.exports = {
                 loader: "url-loader!file-loader?limit=8192&name=/icons/[name].[ext]"
             },
             {
-                test: /\.(html|htm|json)$/,
+                test: /\.(html|htm)$/,
                 loader: "file-loader?name=[name].[ext]"
+            },
+            {
+                test: /\.json$/,
+                loader: "json-loader"
             }
         ]
     },

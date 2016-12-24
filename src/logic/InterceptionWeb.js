@@ -14,11 +14,12 @@ export default class InterceptionWeb {
         return new Promise((resolve, reject) => {
 
             this.domToImage.toPng(dom).then((dataUrl) => {
-                const img = new Image();
+                let img = new Image();
                 // const img = $(`<img src=${dataUrl}/>`)
                 img.src = dataUrl;
-                document.body.appendChild(img);
-                resolve(this.clip(img, range));
+                const result = this.clip(img, range);
+                document.body.appendChild(result);
+                resolve(result);
             }).catch((error) => {
                 reject(error);
             });
@@ -58,12 +59,11 @@ export default class InterceptionWeb {
         {
             console.log("clip range params exists error");
         }
-
         const base64 = AlloyImage(dom).clip(parseInt(range.startX),
                 parseInt(range.startY),
                 parseInt(range.width),
-                parseInt(range.height)).replace(dom).save("result.png", 0.9);
-        const image = new Image();
+                parseInt(range.height)).replace(dom).save("result.png", 1.0);
+        let image = new Image();
         image.src = base64;
         return image;
     }

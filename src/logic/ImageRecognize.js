@@ -11,9 +11,7 @@ export default class ImageRecognize
     {
         console.log("imageToText", imageLike);
         return new Promise((resolve, reject) => {
-            this.tool.recognize(imageLike, {
-                lang: "chi_sim"
-            })
+            this.tool.recognize(imageLike, "chi_sim")
             .catch(error => {
                 reject(error);
             }).then(result => {

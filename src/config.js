@@ -15,6 +15,7 @@ export default {
             "01": "/",
             "02": "\\",
             "03": "1",
+            "04": "circle item access",
             "10": "circle not confirmed",
             "11": "small circle",
             "12": "big circle",
@@ -27,7 +28,7 @@ export default {
         "diff": {
             "minRadius": 36,
             "maxRadius": 248,
-            "boundary": 100
+            "boundary": 50
         }
     }
 }

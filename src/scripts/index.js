@@ -1,10 +1,30 @@
 
 import Recognize from "./Recognize";
 import setting from "../setting/setting";
+import DOMOperation from "./DomOperation";
+
 
 const state = {
     "webType": null
 }
+
+let recognizeInstance = null;
+
+$(document).keydown((event) => {
+    console.log(event.keyCode);
+    if (recognizeInstance)
+    {
+        if (event.shiftKey && event.ctrlKey && event.keyCode === 77)
+        {
+            recognizeInstance.domDetach();
+        }
+
+        if (event.shiftKey && event.ctrlKey && event.keyCode === 78)
+        {
+            recognizeInstance.domAttach();
+        }
+    }
+});
 
 $(document).ready(function() {
     setTimeout(() => {
@@ -27,7 +47,7 @@ $(document).ready(function() {
         }
         else
         {
-            new Recognize({
+            recognizeInstance = new Recognize({
                 webConfig,
                 state
             });

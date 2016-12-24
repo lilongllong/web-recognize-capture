@@ -15,8 +15,6 @@
         {
           "matches": ["https://s.taobao.com/search?*", "https://item.taobao.com/item.htm*"],
           "js": [
-              "lib/jquery-2.1.4.min.js",
-              "content/contentScript.js",
               "build/alloyimage.js",
               "build/vendor.js",
               "build/main/bundle.js"

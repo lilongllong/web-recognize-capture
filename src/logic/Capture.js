@@ -48,6 +48,7 @@ export default class Capture {
     getElementByCapture(location, range)
     {
         this.updateWatchDom();
+        console.log("watchElements", this.watchElements);
         const result = this.watchElements.filter(item => {
             const judge = this.filterJudgement(item.element, location, range);
             if (!judge)

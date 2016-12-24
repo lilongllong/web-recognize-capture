@@ -30,6 +30,7 @@ export default class Content {
     }
 
     filter(containerDivList, imgDivList, typeList) {
+
     	if (this.product_list == "") {
     		console.debug("calling API to get product list ...");
 
@@ -124,7 +125,7 @@ export default class Content {
     	item.style.backgroundColor = "#FFCCCC";
     }
 
-    *
+    /*
      * 填补页面空缺
      */
     fillInBlank(page_style) {
@@ -259,7 +260,7 @@ export default class Content {
     	}
     }
 
-    *
+    /*
      * 从商品列表中获取填充的下一个商品
      */
     getNewProduct() {
@@ -370,7 +371,7 @@ export default class Content {
      */
     createTab(url) {
     	chrome.runtime.sendMessage({command: "createTab", target: url}, function(response) {
-    		console.log(response.result);
+    		//console.log(response.result);
     	});
     }
 

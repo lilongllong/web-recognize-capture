@@ -5,7 +5,6 @@ import fileSaver from "file-saver";
 export default class InterceptionWeb {
     constructor()
     {
-        console.log("alloyimage", AlloyImage);
         this.domToImage = domToImage;
     }
 

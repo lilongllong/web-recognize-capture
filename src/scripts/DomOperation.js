@@ -29,8 +29,40 @@ export default class DomOperation {
         });
     }
 
+    getNextPage() {
+      // 获取下一页链接
+      let next_page = $('ul.items li.item.active').next();
+      let a = next_page.children();
+      let s_value = a.attr("data-value");
+
+      let cur_url = $(document)[0].URL;
+      let s_para = cur_url.match(/s=([^& ]*)/);
+      let next_url;
+      if (s_para == null) {
+        next_url = cur_url + "&s=" + s_value;
+      }
+      else {
+        next_url = cur_url.replace(/s=([^& ]*)/, "s=" + s_value);
+      }
+      console.debug(next_url);
+
+      let iframe = document.createElement('iframe');
+      iframe.id = "next_page_iframe";
+      iframe.name = "next_page_iframe"
+      iframe.src = next_url;
+      iframe.width = "0";
+      iframe.height = "0";
+      document.body.appendChild(iframe);
+
+      setTimeout(() => {
+        let item_list = $(window.frames["next_page_iframe"].document).find(".grid.g-clearfix").children().eq(0);
+        console.debug("item_list", item_list);
+      }, 2000);
+    }
+
     filter(containerDivList, imgDivList, typeList) {
-        console.log("i have got it !");
+      this.getNextPage();
+
     	if (this.product_list == "") {
     		console.debug("calling API to get product list ...");
 
@@ -387,43 +419,3 @@ export default class DomOperation {
     	});
     }
 }
-
-/*
- * 根据商品id更新该商品所在dom元素
-   增加id属性；增加边框样式
- */
-// function updateItemByProductId(id, page_style) {
-// 	let item;
-
-// 	if (page_style == GRID_STYLE) {
-// 		let a_id = "J_Itemlist_PLink_" + id;
-// 		item = $('#' + a_id).parent().parent().parent().parent();
-// 	}
-// 	else {
-// 		let a = $('a[data-nid="' + id +'"]').eq(0);
-// 		item = a.parent().parent().parent().parent().parent();
-// 	}
-
-
-// 	item.attr("id",id);
-// 	item.css("background-color", "#FFCCCC");
-// 	return item;
-// }
-
-/*
- * 根据商品id获取其详情页面URL
- */
-// function getTargetURL(id, page_style) {
-// 	let item;
-
-// 	if (page_style == GRID_STYLE) {
-// 		let a_id = "J_Itemlist_PLink_" + id;
-// 		item = $('#' + a_id);
-// 	}
-// 	else {
-// 		item = $('a[data-nid="' + id +'"]').eq(0);
-// 	}
-
-
-// 	return item[0].href;
-// }

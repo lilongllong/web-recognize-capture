@@ -3256,7 +3256,6 @@ webpackJsonp([0],[
 	            var _this2 = this;
 
 	            this.updateWatchDom();
-	            console.log("watchElements", this.watchElements);
 	            var result = this.watchElements.filter(function (item) {
 	                var judge = _this2.filterJudgement(item.element, location, range);
 	                if (!judge) {
@@ -4518,11 +4517,43 @@ webpackJsonp([0],[
 	  }
 
 	  (0, _createClass3.default)(DomOperation, [{
+	    key: "getNextPage",
+	    value: function getNextPage() {
+	      // 获取下一页链接
+	      var next_page = $('ul.items li.item.active').next();
+	      var a = next_page.children();
+	      var s_value = a.attr("data-value");
+
+	      var cur_url = $(document)[0].URL;
+	      var s_para = cur_url.match(/s=([^& ]*)/);
+	      var next_url = void 0;
+	      if (s_para == null) {
+	        next_url = cur_url + "&s=" + s_value;
+	      } else {
+	        next_url = cur_url.replace(/s=([^& ]*)/, "s=" + s_value);
+	      }
+	      console.debug(next_url);
+
+	      var iframe = document.createElement('iframe');
+	      iframe.id = "next_page_iframe";
+	      iframe.name = "next_page_iframe";
+	      iframe.src = next_url;
+	      iframe.width = "0";
+	      iframe.height = "0";
+	      document.body.appendChild(iframe);
+
+	      setTimeout(function () {
+	        var item_list = $(window.frames["next_page_iframe"].document).find(".grid.g-clearfix").children().eq(0);
+	        console.debug("item_list", item_list);
+	      }, 2000);
+	    }
+	  }, {
 	    key: "filter",
 	    value: function filter(containerDivList, imgDivList, typeList) {
 	      var _this2 = this;
 
-	      console.log("i have got it !");
+	      this.getNextPage();
+
 	      if (this.product_list == "") {
 	        console.debug("calling API to get product list ...");
 
@@ -4892,6 +4923,7 @@ webpackJsonp([0],[
 	  }, {
 	    key: "createTab",
 	    value: function createTab(url) {
+	      console.log("createing tab: " + url);
 	      chrome.runtime.sendMessage({ command: "createTab", target: url }, function (response) {
 	        console.log(response.result);
 	      });
@@ -4913,47 +4945,6 @@ webpackJsonp([0],[
 	  }]);
 	  return DomOperation;
 	}();
-
-	/*
-	 * 根据商品id更新该商品所在dom元素
-	   增加id属性；增加边框样式
-	 */
-	// function updateItemByProductId(id, page_style) {
-	// 	let item;
-
-	// 	if (page_style == GRID_STYLE) {
-	// 		let a_id = "J_Itemlist_PLink_" + id;
-	// 		item = $('#' + a_id).parent().parent().parent().parent();
-	// 	}
-	// 	else {
-	// 		let a = $('a[data-nid="' + id +'"]').eq(0);
-	// 		item = a.parent().parent().parent().parent().parent();
-	// 	}
-
-
-	// 	item.attr("id",id);
-	// 	item.css("background-color", "#FFCCCC");
-	// 	return item;
-	// }
-
-	/*
-	 * 根据商品id获取其详情页面URL
-	 */
-	// function getTargetURL(id, page_style) {
-	// 	let item;
-
-	// 	if (page_style == GRID_STYLE) {
-	// 		let a_id = "J_Itemlist_PLink_" + id;
-	// 		item = $('#' + a_id);
-	// 	}
-	// 	else {
-	// 		item = $('a[data-nid="' + id +'"]').eq(0);
-	// 	}
-
-
-	// 	return item[0].href;
-	// }
-
 
 	exports.default = DomOperation;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
@@ -4994,7 +4985,6 @@ webpackJsonp([0],[
 	        value: function imageToText(imageLike) {
 	            var _this = this;
 
-	            console.log("imageToText", imageLike);
 	            return new Promise(function (resolve, reject) {
 	                _this.tool.recognize(imageLike, "chi_sim").catch(function (error) {
 	                    reject(error);
@@ -5227,18 +5217,18 @@ webpackJsonp([0],[
 		"_args": [
 			[
 				{
-					"raw": "tesseract.js",
+					"raw": "tesseract.js@^1.0.10",
 					"scope": null,
 					"escapedName": "tesseract.js",
 					"name": "tesseract.js",
-					"rawSpec": "",
-					"spec": "latest",
-					"type": "tag"
+					"rawSpec": "^1.0.10",
+					"spec": ">=1.0.10 <2.0.0",
+					"type": "range"
 				},
-				"/Users/i330558/Desktop/web-recognize-capture"
+				"/Users/yef/codes/chrome-plugin/web-recognize-capture"
 			]
 		],
-		"_from": "tesseract.js@latest",
+		"_from": "tesseract.js@>=1.0.10 <2.0.0",
 		"_id": "tesseract.js@1.0.10",
 		"_inCache": true,
 		"_location": "/tesseract.js",
@@ -5254,23 +5244,22 @@ webpackJsonp([0],[
 		"_npmVersion": "3.10.8",
 		"_phantomChildren": {},
 		"_requested": {
-			"raw": "tesseract.js",
+			"raw": "tesseract.js@^1.0.10",
 			"scope": null,
 			"escapedName": "tesseract.js",
 			"name": "tesseract.js",
-			"rawSpec": "",
-			"spec": "latest",
-			"type": "tag"
+			"rawSpec": "^1.0.10",
+			"spec": ">=1.0.10 <2.0.0",
+			"type": "range"
 		},
 		"_requiredBy": [
-			"#DEV:/",
-			"#USER"
+			"#DEV:/"
 		],
 		"_resolved": "https://registry.npmjs.org/tesseract.js/-/tesseract.js-1.0.10.tgz",
 		"_shasum": "e11a96ae76147939d9218f88e287fb69414b1e5d",
 		"_shrinkwrap": null,
-		"_spec": "tesseract.js",
-		"_where": "/Users/i330558/Desktop/web-recognize-capture",
+		"_spec": "tesseract.js@^1.0.10",
+		"_where": "/Users/yef/codes/chrome-plugin/web-recognize-capture",
 		"author": "",
 		"browser": {
 			"./src/node/index.js": "./src/browser/index.js"
@@ -5609,7 +5598,6 @@ webpackJsonp([0],[
 	    function InterceptionWeb() {
 	        (0, _classCallCheck3.default)(this, InterceptionWeb);
 
-	        console.log("alloyimage", AlloyImage);
 	        this.domToImage = _domToImage2.default;
 	    }
 
